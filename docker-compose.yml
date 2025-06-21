@@ -43,7 +43,7 @@ services:
     environment:
       - OLLAMA_BASE_URL=http://ollama:11434
     working_dir: /app
-    command: poetry run python run.py
+    command: poetry run python dun.py
 
 volumes:
   ollama_data:

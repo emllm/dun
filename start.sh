@@ -89,7 +89,7 @@ for i in {1..20}; do
 done
 
 echo ""
-echo "🎉 System Runy jest gotowy!"
+echo "🎉 System dun jest gotowy!"
 echo ""
 echo "📋 Dostępne serwisy:"
 echo "   • IMAP Server: localhost:143"

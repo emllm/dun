@@ -33,7 +33,7 @@ System automatycznego przetwarzania danych z wykorzystaniem LLM (Mistral 7B) do 
 
 ```bash
 git clone <repository>
-cd runy
+cd dun
 ```
 
 ### 2. Utworzenie przykładowych emaili
@@ -59,13 +59,13 @@ docker-compose up -d --build
 poetry install
 
 # Uruchom główny skrypt
-poetry run python run.py
+poetry run python dun.py
 ```
 
 ## 🏗️ Architektura
 
 ```
-runy/
+dun/
 ├── src/
 │   ├── processor_engine.py    # Główny silnik procesora
 │   └── llm_analyzer.py        # Analizator LLM
@@ -74,7 +74,7 @@ runy/
 │   ├── users                 # Dane użytkowników
 │   └── mail/                 # Folder z wiadomościami
 ├── output/                   # Folder wynikowy
-├── run.py                    # Główny skrypt
+├── dun.py                    # Główny skrypt
 ├── .env                      # Konfiguracja
 └── docker-compose.yml        # Definicja serwisów
 ```
@@ -279,6 +279,30 @@ System może być rozszerzony o:
 - **Chmura**: Integracja z Gmail API, Outlook
 - **Analiza treści**: NLP, klasyfikacja, sentiment analysis
 - **Automatyzacja**: Cron jobs, watchdog, webhooks
+
+## 🧪 Testowanie
+
+Projekt zawiera kompleksowe testy jednostkowe i integracyjne. Aby uruchomić testy:
+
+```bash
+# Zainstaluj zależności developerskie
+poetry install --with dev
+
+# Uruchom testy
+poetry run pytest tests/
+
+# Z pokryciem kodu (wymaga pytest-cov)
+poetry run pytest --cov=dun tests/
+
+# Generuj raport HTML z pokryciem
+poetry run pytest --cov=dun --cov-report=html tests/
+```
+
+### Struktura testów
+
+- `tests/unit/` - Testy jednostkowe poszczególnych komponentów
+- `tests/integration/` - Testy integracyjne sprawdzające współdziałanie komponentów
+- `tests/conftest.py` - Konfiguracja i wspólne fikstury
 
 ## 📄 Licencja
 

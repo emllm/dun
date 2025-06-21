@@ -27,4 +27,4 @@ CMD ["poetry", "run", "dun"]
 # Utwórz folder output
 RUN mkdir -p /app/output
 
-CMD ["poetry", "run", "python", "run.py"]
+CMD ["poetry", "run", "python", "dun.py"]

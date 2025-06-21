@@ -1,4 +1,4 @@
-runy/
+dun/
 ├── src/
 │   ├── processor_engine.py    # Główny silnik procesora
 │   └── llm_analyzer.py        # Analizator LLM
@@ -7,6 +7,6 @@ runy/
 │   ├── users                 # Dane użytkowników
 │   └── mail/                 # Folder z wiadomościami
 ├── output/                   # Folder wynikowy
-├── run.py                    # Główny skrypt
+├── dun.py                    # Główny skrypt
 ├── .env                      # Konfiguracja
 └── docker-compose.yml        # Definicja serwisów
