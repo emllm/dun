@@ -1,0 +1,12 @@
+runy/
+├── src/
+│   ├── processor_engine.py    # Główny silnik procesora
+│   └── llm_analyzer.py        # Analizator LLM
+├── docker/
+│   ├── dovecot.conf          # Konfiguracja serwera IMAP
+│   ├── users                 # Dane użytkowników
+│   └── mail/                 # Folder z wiadomościami
+├── output/                   # Folder wynikowy
+├── run.py                    # Główny skrypt
+├── .env                      # Konfiguracja
+└── docker-compose.yml        # Definicja serwisów

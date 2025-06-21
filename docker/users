@@ -1,0 +1,1 @@
+testuser@example.com:{PLAIN}testpass123:1000:1000::/srv/mail/testuser@example.com::userdb_mail=maildir:/srv/mail/testuser@example.com
