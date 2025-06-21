@@ -2,29 +2,42 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Instaluj Poetry
-RUN pip install poetry
-
-# Ustaw zmienne środowiskowe
+# Set environment variables
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
+ENV POETRY_VERSION=1.7.1
 
-# Konfiguruj Poetry
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libmagic1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Poetry
+RUN pip install --no-cache-dir poetry==${POETRY_VERSION}
+
+# Configure Poetry
 RUN poetry config virtualenvs.create false
 
-# Kopiuj pliki projektu
+# Copy project files
 COPY pyproject.toml poetry.lock* ./
 
-# Instaluj zależności
-RUN poetry install --no-dev
 
-# Kopiuj kod aplikacji
+# Copy application code
 COPY . .
 
-# Ustawienie domyślnego polecenia
-CMD ["poetry", "run", "dun"]
+# Install the package with all dependencies
+RUN pip install --no-cache-dir -U pip setuptools wheel
 
-# Utwórz folder output
+# Install the project with poetry first
+RUN poetry install --no-interaction --no-ansi --no-root
+RUN poetry install --no-interaction --no-ansi
+
+# Install loguru in the poetry environment
+RUN poetry run pip install --no-cache-dir loguru
+
+# Create output directory
 RUN mkdir -p /app/output
 
+# Set the default command
 CMD ["poetry", "run", "python", "dun.py"]

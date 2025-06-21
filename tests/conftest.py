@@ -39,7 +39,7 @@ def processor_engine(mock_llm_analyzer):
 
 
 @pytest.fixture
-dynamic_package_manager():
+def dynamic_package_manager():
     """Create a dynamic package manager with mocked methods."""
     manager = DynamicPackageManager()
     manager.install_package = MagicMock(return_value=True)

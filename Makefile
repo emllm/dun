@@ -7,7 +7,7 @@ PROJECT_NAME = emllm
 POETRY := poetry
 
 # Python paths
-PYTHON := $(shell $(POETRY) env info --path)/bin/python
+PYTHON := python3
 PYTHON_SRC := src/$(PROJECT_NAME)
 
 .PHONY: install test lint clean build publish docs start-server test-message test-api test-cli
