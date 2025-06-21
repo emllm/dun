@@ -62,6 +62,78 @@ poetry install
 poetry run python dun.py
 ```
 
+## ⚙️ Konfiguracja
+
+Konfiguracja aplikacji odbywa się poprzez zmienne środowiskowe. Skopiuj plik `.env.example` do `.env` i dostosuj ustawienia:
+
+```bash
+cp .env.example .env
+```
+
+### Główne ustawienia
+
+| Zmienna | Wartość domyślna | Opis |
+|---------|----------------|-------------|
+| `APP_ENV` | `development` | Środowisko działania (development, testing, production) |
+| `APP_DEBUG` | `true` | Tryb debugowania (true/false) |
+| `LOG_LEVEL` | `INFO` | Poziom logowania (DEBUG, INFO, WARNING, ERROR, CRITICAL) |
+| `LOG_FILE` | `logs/dun.log` | Ścieżka do pliku z logami |
+
+### Konfiguracja IMAP
+
+| Zmienna | Wartość domyślna | Opis |
+|---------|----------------|-------------|
+| `IMAP_ENABLED` | `true` | Włącza/wyłącza obsługę IMAP |
+| `IMAP_SERVER` | `localhost` | Adres serwera IMAP |
+| `IMAP_PORT` | `143` | Port serwera IMAP |
+| `IMAP_USERNAME` | `testuser@example.com` | Nazwa użytkownika IMAP |
+| `IMAP_PASSWORD` | `testpass123` | Hasło IMAP |
+| `IMAP_USE_SSL` | `false` | Włącza szyfrowanie SSL |
+| `IMAP_FOLDER` | `INBOX` | Domyślny folder pocztowy |
+| `IMAP_TIMEOUT` | `30` | Limit czasu połączenia (w sekundach) |
+| `IMAP_MARK_AS_READ` | `true` | Oznacz wiadomości jako przeczytane |
+| `IMAP_DOWNLOAD_ATTACHMENTS` | `true` | Automatyczne pobieranie załączników |
+
+### Konfiguracja Ollama (LLM)
+
+| Zmienna | Wartość domyślna | Opis |
+|---------|----------------|-------------|
+| `OLLAMA_ENABLED` | `true` | Włącza/wyłącza integrację z Ollama |
+| `OLLAMA_BASE_URL` | `http://localhost:11434` | Adres URL serwera Ollama |
+| `OLLAMA_MODEL` | `mistral:7b` | Nazwa modelu językowego |
+| `OLLAMA_TIMEOUT` | `120` | Limit czasu odpowiedzi (w sekundach) |
+| `OLLAMA_MAX_TOKENS` | `2000` | Maksymalna liczba tokenów w odpowiedzi |
+| `OLLAMA_TEMPERATURE` | `0.7` | Parametr kreatywności (0-1) |
+| `OLLAMA_TOP_P` | `0.9` | Parametr różnorodności odpowiedzi |
+
+### Ścieżki i katalogi
+
+| Zmienna | Wartość domyślna | Opis |
+|---------|----------------|-------------|
+| `APP_DIR` | `/app` | Główny katalog aplikacji |
+| `DATA_DIR` | `./data` | Katalog na dane |
+| `OUTPUT_DIR` | `./output` | Katalog wyjściowy |
+| `TEMP_DIR` | `./temp` | Katalog tymczasowy |
+| `CACHE_DIR` | `./.cache` | Katalog na cache |
+
+### Ustawienia wydajności
+
+| Zmienna | Wartość domyślna | Opis |
+|---------|----------------|-------------|
+| `MAX_WORKERS` | `4` | Maksymalna liczba wątków roboczych |
+| `TASK_TIMEOUT` | `300` | Limit czasu wykonania zadania (w sekundach) |
+| `MAX_RETRIES` | `3` | Maksymalna liczba prób ponowienia |
+| `RETRY_DELAY` | `5` | Opóźnienie między ponownymi próbami (w sekundach) |
+
+### Bezpieczeństwo
+
+| Zmienna | Wartość domyślna | Opis |
+|---------|----------------|-------------|
+| `ENABLE_RATE_LIMITING` | `true` | Włącza ograniczanie zapytań |
+| `MAX_REQUESTS_PER_MINUTE` | `60` | Maksymalna liczba zapytań na minutę |
+| `REQUIRE_AUTH` | `false` | Wymagaj uwierzytelniania |
+| `AUTH_TOKEN` | - | Token uwierzytelniający |
+
 ## 🏗️ Architektura
 
 ```
