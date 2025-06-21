@@ -32,7 +32,7 @@ services:
              wait"
 
   # Aplikacja główna
-  data-processor:
+  dun:
     build: .
     depends_on:
       - mailserver

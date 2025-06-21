@@ -1,11 +1,24 @@
 [tool.poetry]
-name = "runy"
-version = "0.1.0"
+name = "dun"
+version = "0.1.5"
 description = "Dynamiczny procesor danych z automatycznym wykrywaniem bibliotek"
 authors = ["Tom Sapletta <info@softreck.dev>"]
 readme = "README.md"
 license = "MIT"
-packages = [{include = "runy"}]
+packages = [
+    { include = "dun", from = "src" },
+]
+
+include = [
+    "README.md",
+    "LICENSE",
+    "pyproject.toml",
+    "start.sh",
+    "setup_test_emails.py",
+    "docker-compose.yml",
+    "Dockerfile",
+    "docker/*",
+]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -27,8 +40,7 @@ loguru = "^0.7.2"
 python-dotenv = "^1.0.0"
 
 [tool.poetry.scripts]
-runy = "runy.cli.commands:main"
-runy-api = "runy.api.app:app"
+dun = "dun.__main__:main"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

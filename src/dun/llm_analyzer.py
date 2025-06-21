@@ -6,7 +6,7 @@ import json
 import requests
 from typing import Dict, Any
 from loguru import logger
-from processor_engine import ProcessorConfig
+from .processor_engine import ProcessorConfig
 
 
 class LLMAnalyzer:

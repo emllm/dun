@@ -12,8 +12,8 @@ from dotenv import load_dotenv
 # Dodaj src do PYTHONPATH
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from processor_engine import ProcessorEngine
-from llm_analyzer import LLMAnalyzer
+from dun.processor_engine import ProcessorEngine
+from dun.llm_analyzer import LLMAnalyzer
 
 
 def main():

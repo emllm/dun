@@ -5,6 +5,10 @@ WORKDIR /app
 # Instaluj Poetry
 RUN pip install poetry
 
+# Ustaw zmienne środowiskowe
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
 # Konfiguruj Poetry
 RUN poetry config virtualenvs.create false
 
@@ -16,6 +20,9 @@ RUN poetry install --no-dev
 
 # Kopiuj kod aplikacji
 COPY . .
+
+# Ustawienie domyślnego polecenia
+CMD ["poetry", "run", "dun"]
 
 # Utwórz folder output
 RUN mkdir -p /app/output
