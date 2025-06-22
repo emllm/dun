@@ -5,7 +5,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from dun import LLMAnalyzer, ProcessorEngine
+from dun.llm_analyzer import LLMAnalyzer
+from dun.core.engine.processor_engine import ProcessorEngine
 
 
 class TestIntegration:
