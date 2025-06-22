@@ -48,6 +48,9 @@ ollama = {version = "^0.1.5", optional = true}
 [tool.poetry.extras]
 ollama = ["ollama"]
 
+[tool.poetry.group.dev.dependencies]
+pytest-asyncio = "^1.0.0"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"

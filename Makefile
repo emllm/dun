@@ -19,7 +19,7 @@ install:
 # Run all tests
 .PHONY: test
 test:
-	$(PYTHON) -m pytest tests/ --cov=$(PYTHON_SRC) --cov-report=term-missing
+	$(POETRY) run pytest tests/ --cov=$(PYTHON_SRC) --cov-report=term-missing
 
 # Run API tests
 .PHONY: test-api
