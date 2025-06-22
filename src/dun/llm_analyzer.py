@@ -8,6 +8,7 @@ import requests
 from typing import Dict, Any
 from loguru import logger
 from .processor_engine import ProcessorConfig
+from dun.dynamic_processor_mapper import DynamicProcessorMapper
 
 
 class LLMAnalyzer:
@@ -40,8 +41,8 @@ class LLMAnalyzer:
             except Exception as e:
                 logger.warning(f"LLM niedostępny ({e}), używanie domyślnego procesora")
         
-        # Użyj odpowiedniego domyślnego procesora
-        return self._get_default_imap_processor()
+        # Dynamicznie wybierz domyślny procesor na podstawie treści żądania
+        return self._get_default_processor()
 
     def _analyze_with_llm(self, request: str) -> ProcessorConfig:
         """Analizuje żądanie za pomocą LLM."""
@@ -100,20 +101,22 @@ Kod powinien:
 
         return ProcessorConfig(**config_data)
 
-    def _get_default_imap_processor(self) -> ProcessorConfig:
-        """Zwraca domyślny procesor jako fallback."""
-        
-        # Always use CSV processor for now since we're focusing on CSV processing
+    def _get_default_processor(self) -> ProcessorConfig:
+        """Zaawansowane mapowanie: wykryj bibliotekę i funkcje na podstawie żądania, generuj debug info."""
+        mapper = DynamicProcessorMapper()
+        req = self.last_request or ""
+        lib = mapper.detect_library(req)
+        debug_info = mapper.generate_debug_info(req)
+        logger.info(f"[DynamicProcessorMapper] {debug_info}")
+        # Wybierz procesor na podstawie wykrytej biblioteki
+        if lib == "imaplib":
+            return self._get_imap_processor()
+        if lib == "pandas":
+            return self._get_csv_processor()
+        # Możesz tu dodać obsługę innych bibliotek, np. requests/sqlite3
+        # Domyślnie CSV
         return self._get_csv_processor()
-        
-        # This code is kept for future reference when we want to support multiple processors
-        # # Sprawdź czy żądanie dotyczy CSV
-        # if any(keyword in self.last_request.lower() for keyword in ['csv', 'plik', 'dane', 'dataset', 'excel']):
-        #     return self._get_csv_processor()
-            
-        # # Domyślnie zwróć procesor IMAP
-        # return self._get_imap_processor()
-        
+
     def _get_csv_processor(self) -> ProcessorConfig:
         """Zwraca konfigurację procesora CSV.
         

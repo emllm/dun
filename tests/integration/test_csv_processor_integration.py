@@ -80,6 +80,7 @@ class TestCSVProcessorIntegration:
         
         # Capture output
         captured = capsys.readouterr()
+        print("[DEBUG CLI OUTPUT]", captured.out)
         
         # Verify output contains success message
         assert "Zapisano połączony zbiór danych" in captured.out

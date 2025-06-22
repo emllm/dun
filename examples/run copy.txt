@@ -1,0 +1,99 @@
+pokaż 10 najnowszych emaili
+znajdź emaile od jan@example.com
+pokaż nieprzeczytane wiadomości
+wyszukaj "ważna wiadomość" w tematach
+policz wiadomości z ostatniego tygodnia
+pokaż załączniki z ostatniego miesiąca
+znajdź wiadomości z załącznikami większymi niż 5MB
+pokaż kalendarz spotkań na ten tydzień
+znajdź wiadomości z hasłem w treści
+pokaż statystyki skrzynki odbiorczej
+policz wiadomości w folderze Archiwum
+znajdź duplikaty wiadomości
+pokaż nieodebrane połączenia
+znajdź wiadomości z linkami do spotkań
+pokaż wiadomości z dzisiejszą datą
+znajdź nieodebrane telefony
+pokaż listę kontaktów
+znajdź wiadomości z załącznikami .pdf
+pokaż nieprzeczytane powiadomienia
+znajdź wiadomości z ważnych nadawców
+pokaż statystyki aktywności
+znajdź wiadomości z hasłem w temacie
+pokaż listę zadań do wykonania
+znajdź wiadomości z potwierdzeniami
+pokaż wiadomości z ostatniej godziny
+znajdź wiadomości z kodem potwierdzającym
+pokaż listę nieprzeczytanych wątkó
+znajdź wiadomości z fakturami
+pokaż wiadomości z przypomnieniami
+znajdź wiadomości z potwierdzeniami płatności
+pokaż listę spotkań na jutro
+znajdź wiadomości z hasłami
+dodaj nowe zadanie: przygotować prezentację
+pokaż listę zadań na dziś
+otwórz nowy notatnik: "Spotkanie z klientem"
+dodaj wydarzenie: "Spotkanie zespołu jutro o 10:00"
+pokaż kalendarz na ten miesiąc
+wyślij wiadomość do "Jan Kowalski" z tematem "Spotkanie" i treścią "Cześć, spotkajmy się jutro"
+zaplanuj przypomnienie: "Zadzwoń do klienta" za 2 godziny
+pokaż listę kontaktów z działu IT
+wyeksportuj wiadomości z ostatniego miesiąca do pliku CSV
+zaimportuj kontakty z pliku kontakty.vcf
+pokaż statystyki aktywności z ostatniego tygodnia
+zarchiwizuj wiadomości starsze niż rok
+przenieś wiadomości ze skrzynki odbiorczej do folderu Archiwum
+zaznacz wybrane wiadomości jako przeczytane
+usuń wiadomości starsze niż 2 lata
+utwórz filtr przenoszący wiadomości od szefa do folderu Ważne
+pokaż podsumowanie dnia
+znajdź duże załączniki
+wyczyść folder Kosz
+zoptymalizuj bazę danych
+pokaż listę zadań z priorytetem wysoki
+znajdź wiadomości z potwierdzeniami rezerwacji
+pokaż listę spotkań na następny tydzień
+wygeneruj raport aktywności
+znajdź wiadomości z potwierdzeniami zakupów
+pokaż statystyki użycia skrzynki pocztowej
+zaktualizuj listę kontaktów
+pokaż listę nieodebranych połączeń
+znajdź wiadomości z potwierdzeniami lotów
+pokaż listę zadań z terminem na dziś
+wyślij odpowiedź automatyczną o nieobecności
+zaplanuj spotkanie na jutro o 14:00
+pokaż listę zadań z opóźnieniem
+znajdź wiadomości z potwierdzeniami rezerwacji hoteli
+pokaż listę spotkań z klientami
+wygeneruj podsumowanie miesiąca
+znajdź wiadomości z potwierdzeniami przelewów
+pokaż statystyki odpowiedzi na wiadomości
+zarchiwizuj załączniki starsze niż miesiąc
+pokaż listę zadań bez przypisanego terminu
+znajdź wiadomości z potwierdzeniami konferencji
+pokaż listę spotkań w bieżącym tygodniu
+wyeksportuj kontakty do pliku vCard
+zaimportuj wydarzenia z pliku ICS
+pokaż listę zadań z priorytetem średni
+znajdź wiadomości z potwierdzeniami rejestracji
+pokaż listę spotkań na jutro rano
+wygeneruj raport wydatków z załączników
+znajdź wiadomości z potwierdzeniami subskrypcji
+pokaż statystyki ruchu w skrzynce odbiorczej
+zarchiwizuj wiadomości z załącznikami
+pokaż listę zadań z przypomnieniami
+znajdź wiadomości z potwierdzeniami dostaw
+pokaż listę spotkań na popołudnie
+wyślij masową wiadomość do zespołu
+zaplanuj cykliczne spotkanie co tydzień w poniedziałek
+pokaż listę zadań z priorytetem niski
+znajdź wiadomości z potwierdzeniami płatności kartą
+pokaż listę spotkań na następny miesiąc
+wygeneruj podsumowanie kwartału
+znajdź wiadomości z potwierdzeniami zamówień
+pokaż statystyiki odpowiedzi na wiadomości
+zarchiwizuj wiadomości bez załączników
+pokaż listę zadań z przypomnieniami na dziś
+znajdź wiadomości z potwierdzeniami rezerwacji biletów
+pokaż listę spotkań z konkretnym klientem
+wyślij przypomnienie o spotkaniu jutro rano

@@ -55,7 +55,7 @@ EOL
  grep -v '^\s*#' | \
  while IFS= read -r line; do
     echo "[$COUNT/$TOTAL] $line"
-    echo "$line" | python "$TEMP_SCRIPT" 2>&1 | tee "$LOG_DIR/command_${COUNT}.log"
+    echo "$line" | poetry run python "$TEMP_SCRIPT" 2>&1 | tee "$LOG_DIR/command_${COUNT}.log"
     ((COUNT++))
     sleep 0.5
 done)
