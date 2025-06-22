@@ -141,37 +141,52 @@ logger.debug(f"OUTPUT_FILE: {output_file}")
 logger.info(f"Bieżący katalog roboczy: {os.getcwd()}")
 
 # Użyj katalogu tymczasowego jeśli nie można zapisać w docelowej lokalizacji
+use_temp_dir = False
+err_msg = ""
+temp_dir = None
+original_output_file = output_file
+
+# Sprawdź czy katalog wyjściowy istnieje, jeśli nie to spróbuj go utworzyć
 try:
-    logger.info("Sprawdzanie uprawnień do katalogu wyjściowego...")
-    # Spróbuj utworzyć katalog wyjściowy z uprawnieniami
     output_dir = os.path.dirname(output_file) or '.'
     logger.debug(f"Próba utworzenia katalogu: {output_dir}")
+    os.makedirs(output_dir, exist_ok=True)
+    logger.debug(f"Utworzono/istnieje katalog: {output_dir}")
     
+    # Sprawdź czy mamy uprawnienia do zapisu
+    test_file = os.path.join(output_dir, f'.test_write_{os.getpid()}')
+    logger.debug(f"Test zapisu do pliku: {test_file}")
+    
+    with open(test_file, 'w') as f:
+        f.write('test')
+    os.remove(test_file)
+    logger.debug("Test uprawnień zakończony powodzeniem")
+    
+except Exception as e:
+    err_msg = str(e)
+    logger.warning(f"Błąd podczas sprawdzania uprawnień: {err_msg}")
+    use_temp_dir = True
+
+if use_temp_dir:
+    # Jeśli nie można zapisać w docelowej lokalizacji, użyj katalogu tymczasowego
+    logger.warning(f"Błąd dostępu do katalogu wyjściowego: {err_msg}")
+    import tempfile
+    temp_dir = tempfile.mkdtemp(prefix='dun_csv_')
+    output_file = os.path.join(temp_dir, 'combined.csv')
+    logger.warning(f"Używam katalogu tymczasowego: {output_file}")
+    logger.info(f"Pełna ścieżka tymczasowa: {os.path.abspath(output_file)}")
+    
+    # Upewnij się, że katalog tymczasowy istnieje i jest zapisywalny
     try:
-        os.makedirs(output_dir, mode=0o755, exist_ok=True)
-        logger.debug(f"Utworzono/istnieje katalog: {output_dir}")
-        
-        # Sprawdź czy mamy uprawnienia do zapisu
-        test_file = os.path.join(output_dir, f'.test_write_{os.getpid()}')
-        logger.debug(f"Test zapisu do pliku: {test_file}")
-        
+        os.makedirs(temp_dir, exist_ok=True)
+        test_file = os.path.join(temp_dir, f'.test_write_{os.getpid()}')
         with open(test_file, 'w') as f:
             f.write('test')
         os.remove(test_file)
-        logger.debug("Test uprawnień zakończony powodzeniem")
-        
+        logger.debug("Potwierdzono możliwość zapisu w katalogu tymczasowym")
     except Exception as e:
-        logger.warning(f"Błąd podczas sprawdzania uprawnień: {str(e)}")
+        logger.error(f"Błąd podczas sprawdzania uprawnień do katalogu tymczasowego: {str(e)}")
         raise
-    
-except (OSError, IOError) as e:
-    # Jeśli nie można zapisać w docelowej lokalizacji, użyj katalogu tymczasowego
-    logger.warning(f"Błąd dostępu do katalogu wyjściowego: {str(e)}")
-    import tempfile
-    temp_dir = tempfile.mkdtemp(prefix='dun_csv_')
-    output_file = os.path.join(temp_dir, os.path.basename(output_file))
-    logger.warning(f"Używam katalogu tymczasowego: {output_file}")
-    logger.info(f"Pełna ścieżka tymczasowa: {os.path.abspath(output_file)}")
 
 logger.info(f"Szukam plików CSV w katalogu: {input_dir}")
 
@@ -214,7 +229,9 @@ for file in csv_files:
         logger.info(f"  Wczytano {len(df)} wierszy i {len(df.columns)} kolumn")
         logger.debug(f"Nazwy kolumn: {list(df.columns)}")
         if not df.empty:
-            logger.debug(f"Przykładowe dane:\n{df.head(2).to_string()}")
+            sample_data = df.head(2).to_string()
+            logger.debug("Przykładowe dane:")
+            logger.debug(sample_data)
         
         dfs.append(df)
         logger.debug(f"Dodano dane z pliku {file_path} do listy")
@@ -242,27 +259,61 @@ try:
     logger.debug(f"Nazwy kolumn po połączeniu: {list(combined_df.columns)}")
     
     if not combined_df.empty:
+        sample_combined = combined_df.head(2).to_string()
         logger.debug("Przykładowe dane po połączeniu:")
-        logger.debug(f"\n{combined_df.head(2).to_string()}")
+        logger.debug(sample_combined)
     else:
         logger.warning("Połączona ramka danych jest pusta")
     
-    # Zapisz wynik
+    # Sprawdź czy są jakieś dane do zapisania
+    if combined_df.empty:
+        error_msg = "Brak danych do zapisania - połączona ramka danych jest pusta"
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+    
+    # Sprawdź czy są jakieś wiersze danych (pomijając nagłówek)
+    if len(combined_df) == 0:
+        error_msg = "Brak wierszy danych do zapisania"
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+    
+    # Sprawdź czy są jakieś kolumny
+    if len(combined_df.columns) == 0:
+        error_msg = "Brak kolumn w danych do zapisania"
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+    
+    # Użyj już ustawionej ścieżki do pliku wyjściowego (może to być katalog tymczasowy)
+    if not use_temp_dir:
+        output_file = os.path.join(output_dir, 'combined.csv')
+    
     logger.info(f"Zapisywanie połączonych danych do pliku: {output_file}")
+    logger.debug(f"Pełna ścieżka do pliku: {os.path.abspath(output_file)}")
+    logger.debug(f"Czy używam katalogu tymczasowego? {use_temp_dir}")
+    
     try:
-        # Utwórz katalog docelowy jeśli nie istnieje
-        output_dir = os.path.dirname(output_file)
-        if output_dir and not os.path.exists(output_dir):
-            logger.debug(f"Tworzenie katalogu: {output_dir}")
-            os.makedirs(output_dir, exist_ok=True)
+        # Upewnij się, że katalog docelowy istnieje
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
         
-        # Zapisz dane do pliku
-        combined_df.to_csv(output_file, index=False, encoding='utf-8')
+        # Zapisz dane do pliku CSV
+        combined_df.to_csv(output_file, index=False)
+        
+        # Sprawdź czy plik został utworzony i nie jest pusty
+        if not os.path.exists(output_file):
+            error_msg = f"Nie udało się utworzyć pliku wyjściowego: {output_file}"
+            logger.error(error_msg)
+            raise IOError(error_msg)
+            
+        if os.path.getsize(output_file) == 0:
+            error_msg = f"Plik wyjściowy jest pusty: {output_file}"
+            logger.error(error_msg)
+            raise IOError(error_msg)
+            
         logger.success(f"Pomyślnie zapisano dane do pliku: {output_file}")
         logger.debug(f"Rozmiar zapisanego pliku: {os.path.getsize(output_file)} bajtów")
+        
     except Exception as e:
-        error_msg = f"Błąd podczas zapisywania pliku {output_file}: {str(e)}"
-        logger.error(error_msg, exc_info=True)
+        logger.error(f"Błąd podczas zapisywania pliku: {str(e)}")
         raise
     
     # Zwróć informacje o przetworzonych danych
@@ -280,13 +331,15 @@ except Exception as e:
     raise
 
 # Pokaż podsumowanie
-print('\n' + '='*50)
+print('')
+print('='*50)
 print(f'Przetworzono {len(csv_files)} plików CSV')
 print(f'Łączna liczba wierszy: {len(combined_df)}')
 columns = ", ".join(combined_df.columns)
 print(f'Kolumny: {columns}')
 print(f'Wynik zapisano w: {output_file}')
-print('='*50 + '\n')
+print('='*50)
+print('')
 """
         )
         
