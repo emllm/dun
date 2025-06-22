@@ -7,11 +7,11 @@ Alternatywnie:
 
 ---
 
-Run LLM processor in Python with dynamic library inclusion and pipeline building based on Natural Language Commands.
-
 System automatycznego przetwarzania danych z wykorzystaniem LLM (Mistral 7B) do interpretacji żądań w języku naturalnym i dynamicznego instalowania bibliotek Python.
 
 # Dun - Dynamiczny Procesor Danych
+
+> **Note:** Używaj komendy `dun` zamiast `python dun.py` do uruchamiania programu.
 
 ## 🚀 Funkcje
 
@@ -23,26 +23,46 @@ System automatycznego przetwarzania danych z wykorzystaniem LLM (Mistral 7B) do 
 
 ## 📋 Wymagania
 
-- Docker & Docker Compose
-- Python 3.11+ (dla lokalnego uruchamiania)
-- Poetry (dla lokalnego uruchamiania)
+- Docker & Docker Compose (opcjonalnie, tylko do uruchomienia z kontenera)
+- Python 3.11+
+- Poetry (zalecane) lub pip
 
 ## 🔧 Instalacja i uruchomienie
 
-### 1. Klonowanie i przygotowanie
+### 1. Instalacja z użyciem Poetry (zalecane)
 
 ```bash
+# Klonowanie repozytorium
 git clone <repository>
 cd dun
-```
 
-### 2. Utworzenie przykładowych emaili
+# Instalacja zależności
+poetry install
 
-```bash
+# Aktywacja środowiska wirtualnego
+poetry shell
+
+# Utworzenie przykładowych emaili (opcjonalne)
 python setup_test_emails.py
 ```
 
-### 3. Uruchomienie z Docker
+### 2. Instalacja z użyciem pip
+
+```bash
+# Instalacja pakietu
+pip install -e .
+
+# lub dla instalacji globalnej
+# pip install .
+```
+
+### 3. Uruchomienie (tryb interaktywny)
+
+```bash
+dun
+```
+
+### 4. Uruchomienie z Docker (opcjonalne)
 
 ```bash
 # Zbuduj i uruchom wszystkie serwisy

@@ -1,53 +1,60 @@
-# Przykładowe konfiguracje zadań
+# Przykłady użycia `dun`
 
-## 1. Pobieranie emaili z IMAP
+## 1. Tryb interaktywny
 
-**Żądanie NLP:**
+Uruchom interaktywną konsolę `dun`:
+
+```bash
+dun
+```
+
+Po uruchomieniu wprowadź żądanie w języku naturalnym, np.:
 ```
 Pobierz wszystkie wiadomości email ze skrzynki IMAP i zapisz je w folderach 
 uporządkowanych według roku i miesiąca w formacie skrzynka/rok.miesiąc/*.eml
 ```
 
-**Wygenerowana konfiguracja:** `configs/email-imap-processor.yaml`
+## 2. Przetwarzanie plików CSV
 
----
-
-## 2. Analiza plików CSV
-
-**Żądanie NLP:**
-```
-Przeanalizuj wszystkie pliki CSV w folderze data/, połącz je w jeden dataset 
-i wygeneruj raport z podstawowymi statystykami
-```
-
-**Komenda generowania:**
+**Przykładowe żądanie:**
 ```bash
-python generate_config.py "Przeanalizuj wszystkie pliki CSV w folderze data/, połącz je w jeden dataset i wygeneruj raport z podstawowymi statystykami"
+dun "Przeanalizuj wszystkie pliki CSV w folderze data/, połącz je w jeden dataset"
 ```
 
----
+**Opcje dodatkowe:**
+- `--output-format json` - format wyjściowy (domyślnie: json)
+- `--output-file raport.html` - zapisz wynik do pliku
 
 ## 3. Web scraping
 
-**Żądanie NLP:**
-```
-Pobierz wszystkie artykuły z strony news.com, wyodrębnij tytuły i treść, 
-a następnie zapisz w formacie JSON
-```
-
-**Komenda:**
+**Przykładowe użycie:**
 ```bash
-python generate_config.py --template web_scraping "Pobierz artykuły z news.com"
+dun --template web_scraping "Pobierz artykuły z news.com, wyodrębnij tytuły i treść"
 ```
-
----
 
 ## 4. Integracja z API
 
-**Żądanie NLP:**
+**Przykład:**
+```bash
+dun "Pobierz dane z REST API, przefiltruj według daty i zapisz do bazy danych PostgreSQL"
 ```
-Pobierz dane z REST API, przefiltruj według daty i zapisz do bazy danych PostgreSQL
+
+## 5. Przetwarzanie emaili
+
+**Przykładowe użycie:**
+```bash
+dun "Sprawdź nowe wiadomości email i zapisz załączniki w folderze ./załączniki"
 ```
+
+## Konfiguracja
+
+`dun` używa pliku `.env` do konfiguracji. Skopiuj przykładową konfigurację:
+
+```bash
+cp env.example .env
+```
+
+Następnie edytuj plik `.env` i ustaw odpowiednie wartości konfiguracyjne.
 
 ---
 
@@ -65,16 +72,16 @@ Zmień rozmiar wszystkich zdjęć w folderze images/ na 800x600 i zapisz jako JP
 ### Generowanie konfiguracji:
 ```bash
 # Tryb interaktywny
-python generate_config.py --interactive
+python dun.py --interactive
 
 # Z podanym żądaniem
-python generate_config.py "Pobierz emaile z IMAP"
+python dun.py "Pobierz emaile z IMAP"
 
 # Z konkretnym szablonem
-python generate_config.py --template email_processing "Pobierz emaile"
+python dun.py --template email_processing "Pobierz emaile"
 
 # Z walidacją
-python generate_config.py --validate "Pobierz emaile z IMAP"
+python dun.py --validate "Pobierz emaile z IMAP"
 ```
 
 ### Uruchamianie zadań:
