@@ -17,9 +17,48 @@ System automatycznego przetwarzania danych z wykorzystaniem LLM (Mistral 7B) do 
 
 - **Interpretacja języka naturalnego**: Przetwarzanie żądań w zwykłym języku polskim
 - **Dynamiczne zarządzanie bibliotekami**: Automatyczna instalacja wymaganych pakietów Python
+- **Przetwarzanie plików CSV**: Łączenie i analiza wielu plików CSV w jeden zbiór danych
 - **Lokalna skrzynka IMAP**: Testowa skrzynka pocztowa z przykładowymi wiadomościami  
 - **Integracja z Ollama**: Wykorzystanie modelu Mistral 7B do analizy żądań
 - **Organizacja plików**: Automatyczne sortowanie emaili według dat w strukturze folderów
+
+## 📂 Przetwarzanie plików CSV
+
+Dun umożliwia łatwe łączenie i analizowanie wielu plików CSV za pomocą prostych poleceń w języku naturalnym. Funkcja ta działa nawet bez dostępu do modelu LLM.
+
+### Przykłady użycia
+
+```bash
+# Przetwórz wszystkie pliki CSV w katalogu data/
+dun "Przeanalizuj wszystkie pliki CSV w folderze data/"
+
+# Określ niestandardowy katalog wejściowy i wyjściowy
+dun "Połącz pliki CSV z folderu moje_dane i zapisz jako wynik.csv"
+
+# Przetwarzanie z podglądem danych
+dun "Pokaż podsumowanie danych z plików CSV w folderze raporty/"
+```
+
+### Funkcje
+
+- Automatyczne wykrywanie i łączenie plików CSV
+- Obsługa różnych formatów plików (`.csv`, `.CSV`)
+- Automatyczne wykrywanie nagłówków kolumn
+- Obsługa dużych zbiorów danych
+- Szczegółowe logowanie działań
+
+### Konfiguracja
+
+Użyj zmiennych środowiskowych, aby dostosować działanie:
+
+```bash
+export INPUT_DIR=moje_dane
+export OUTPUT_FILE=wyniki/połączone_dane.csv
+```
+
+### Więcej informacji
+
+Zobacz pełną dokumentację przetwarzania CSV w pliku [CSV_PROCESSOR.md](CSV_PROCESSOR.md).
 
 ## 📋 Wymagania
 

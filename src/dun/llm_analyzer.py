@@ -115,7 +115,12 @@ Kod powinien:
         # return self._get_imap_processor()
         
     def _get_csv_processor(self) -> ProcessorConfig:
-        """Zwraca konfigurację procesora CSV."""
+        """Zwraca konfigurację procesora CSV.
+        
+        Returns:
+            ProcessorConfig: Konfiguracja procesora CSV z kodem do wykonania.
+        """
+        logger.debug("Tworzenie konfiguracji procesora CSV")
         return ProcessorConfig(
             name="csv_processor",
             description="Procesor łączący pliki CSV w jeden zbiór danych",
@@ -123,46 +128,164 @@ Kod powinien:
             parameters={"input_dir": "data/", "output_file": "output/combined.csv"},
             code_template="""
 import os
+import sys
 import pandas as pd
 from pathlib import Path
 
+# Pobierz ścieżki z zmiennych środowiskowych lub użyj domyślnych
+logger.info("Inicjalizacja procesora CSV")
 input_dir = os.getenv('INPUT_DIR', 'data/')
 output_file = os.getenv('OUTPUT_FILE', 'output/combined.csv')
+logger.debug(f"INPUT_DIR: {input_dir}")
+logger.debug(f"OUTPUT_FILE: {output_file}")
+logger.info(f"Bieżący katalog roboczy: {os.getcwd()}")
 
-# Utwórz katalog wyjściowy jeśli nie istnieje
-Path(output_file).parent.mkdir(parents=True, exist_ok=True)
+# Użyj katalogu tymczasowego jeśli nie można zapisać w docelowej lokalizacji
+try:
+    logger.info("Sprawdzanie uprawnień do katalogu wyjściowego...")
+    # Spróbuj utworzyć katalog wyjściowy z uprawnieniami
+    output_dir = os.path.dirname(output_file) or '.'
+    logger.debug(f"Próba utworzenia katalogu: {output_dir}")
+    
+    try:
+        os.makedirs(output_dir, mode=0o755, exist_ok=True)
+        logger.debug(f"Utworzono/istnieje katalog: {output_dir}")
+        
+        # Sprawdź czy mamy uprawnienia do zapisu
+        test_file = os.path.join(output_dir, f'.test_write_{os.getpid()}')
+        logger.debug(f"Test zapisu do pliku: {test_file}")
+        
+        with open(test_file, 'w') as f:
+            f.write('test')
+        os.remove(test_file)
+        logger.debug("Test uprawnień zakończony powodzeniem")
+        
+    except Exception as e:
+        logger.warning(f"Błąd podczas sprawdzania uprawnień: {str(e)}")
+        raise
+    
+except (OSError, IOError) as e:
+    # Jeśli nie można zapisać w docelowej lokalizacji, użyj katalogu tymczasowego
+    logger.warning(f"Błąd dostępu do katalogu wyjściowego: {str(e)}")
+    import tempfile
+    temp_dir = tempfile.mkdtemp(prefix='dun_csv_')
+    output_file = os.path.join(temp_dir, os.path.basename(output_file))
+    logger.warning(f"Używam katalogu tymczasowego: {output_file}")
+    logger.info(f"Pełna ścieżka tymczasowa: {os.path.abspath(output_file)}")
+
+logger.info(f"Szukam plików CSV w katalogu: {input_dir}")
 
 # Znajdź wszystkie pliki CSV w katalogu
-csv_files = [f for f in Path(input_dir).glob('**/*') if f.suffix.lower() == '.csv']
+logger.info(f"Przeszukiwanie katalogu {input_dir} w poszukiwaniu plików CSV...")
+csv_files = []
+for ext in ['.csv', '.CSV']:
+    pattern = f'*{ext}'
+    logger.debug(f"Wyszukiwanie plików z rozszerzeniem: {pattern}")
+    files = list(Path(input_dir).rglob(pattern))
+    logger.debug(f"Znaleziono {len(files)} plików z rozszerzeniem {ext}")
+    csv_files.extend(files)
+
+logger.info(f"Znaleziono łącznie {len(csv_files)} plików CSV")
+logger.debug(f"Lista znalezionych plików: {[str(f) for f in csv_files]}")
 
 if not csv_files:
-    raise ValueError(f"Nie znaleziono plików CSV w katalogu {input_dir}")
+    error_msg = f"Nie znaleziono plików CSV w katalogu {input_dir}"
+    logger.error(error_msg)
+    raise ValueError(error_msg)
 
 # Wczytaj i połącz wszystkie pliki CSV
+logger.info("Rozpoczęcie wczytywania plików CSV...")
 dfs = []
 for file in csv_files:
-    logger.info(f"Przetwarzanie pliku: {file}")
-    df = pd.read_csv(file)
-    dfs.append(df)
+    try:
+        file_path = str(file)
+        logger.info(f"Przetwarzanie pliku: {file_path}")
+        logger.debug(f"Pełna ścieżka: {os.path.abspath(file_path)}")
+        
+        # Sprawdź rozmiar pliku
+        file_size = os.path.getsize(file_path)
+        logger.debug(f"Rozmiar pliku: {file_size} bajtów")
+        
+        # Wczytaj plik CSV
+        logger.debug("Wczytywanie danych CSV...")
+        df = pd.read_csv(file_path, encoding='utf-8', encoding_errors='replace')
+        
+        # Zaloguj informacje o wczytanych danych
+        logger.info(f"  Wczytano {len(df)} wierszy i {len(df.columns)} kolumn")
+        logger.debug(f"Nazwy kolumn: {list(df.columns)}")
+        if not df.empty:
+            logger.debug(f"Przykładowe dane:\n{df.head(2).to_string()}")
+        
+        dfs.append(df)
+        logger.debug(f"Dodano dane z pliku {file_path} do listy")
+        
+    except Exception as e:
+        error_msg = f"Błąd podczas przetwarzania pliku {file}: {str(e)}"
+        logger.error(error_msg, exc_info=True)  # Zapis pełnego śladu stosu
+        continue
 
 if not dfs:
-    raise ValueError("Nie udało się wczytać żadnych danych")
+    error_msg = "Nie udało się wczytać żadnych danych z plików CSV"
+    logger.error(error_msg)
+    raise ValueError(error_msg)
+
+logger.info(f"Przygotowano {len(dfs)} ramek danych do połączenia")
+logger.debug(f"Rozmiary ramek: {[len(df) for df in dfs]}")
 
 # Połącz wszystkie ramki danych
-combined_df = pd.concat(dfs, ignore_index=True)
+try:
+    logger.info("Rozpoczęcie łączenia ramek danych...")
+    combined_df = pd.concat(dfs, ignore_index=True)
+    logger.info(f"Pomyślnie połączono dane")
+    logger.info(f"Łączna liczba wierszy: {len(combined_df)}")
+    logger.info(f"Liczba kolumn: {len(combined_df.columns)}")
+    logger.debug(f"Nazwy kolumn po połączeniu: {list(combined_df.columns)}")
+    
+    if not combined_df.empty:
+        logger.debug("Przykładowe dane po połączeniu:")
+        logger.debug(f"\n{combined_df.head(2).to_string()}")
+    else:
+        logger.warning("Połączona ramka danych jest pusta")
+    
+    # Zapisz wynik
+    logger.info(f"Zapisywanie połączonych danych do pliku: {output_file}")
+    try:
+        # Utwórz katalog docelowy jeśli nie istnieje
+        output_dir = os.path.dirname(output_file)
+        if output_dir and not os.path.exists(output_dir):
+            logger.debug(f"Tworzenie katalogu: {output_dir}")
+            os.makedirs(output_dir, exist_ok=True)
+        
+        # Zapisz dane do pliku
+        combined_df.to_csv(output_file, index=False, encoding='utf-8')
+        logger.success(f"Pomyślnie zapisano dane do pliku: {output_file}")
+        logger.debug(f"Rozmiar zapisanego pliku: {os.path.getsize(output_file)} bajtów")
+    except Exception as e:
+        error_msg = f"Błąd podczas zapisywania pliku {output_file}: {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        raise
+    
+    # Zwróć informacje o przetworzonych danych
+    result = {
+        "status": "success",
+        "input_files": [str(f) for f in csv_files],
+        "output_file": output_file,
+        "rows_processed": len(combined_df),
+        "columns": list(combined_df.columns),
+        "sample_data": combined_df.head(2).to_dict(orient='records') if not combined_df.empty else []
+    }
+    
+except Exception as e:
+    logger.error(f"Błąd podczas łączenia i zapisywania danych: {str(e)}")
+    raise
 
-# Zapisz wynik
-combined_df.to_csv(output_file, index=False)
-logger.success(f"Zapisano połączony zbiór danych do: {output_file}")
-
-# Zwróć informacje o przetworzonych danych
-result = {
-    "status": "success",
-    "input_files": [str(f) for f in csv_files],
-    "output_file": output_file,
-    "rows_processed": len(combined_df),
-    "columns": list(combined_df.columns)
-}
+# Pokaż podsumowanie
+print('\\n' + '='*50)
+print(f'Przetworzono {len(csv_files)} plików CSV')
+print(f'Łączna liczba wierszy: {len(combined_df)}')
+print(f'Kolumny: {", ".join(combined_df.columns)}')
+print(f'Wynik zapisano w: {output_file}')
+print('='*50 + '\\n')
 """
         )
         

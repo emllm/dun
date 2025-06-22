@@ -133,6 +133,79 @@ help-examples:
 	@echo "  make example-analyze-email   - Analyze email content using LLM"
 	@echo "  make example-custom-request  - Run with custom request (interactive)"
 
+# Run all examples
+.PHONY: examples
+examples: example-env
+	@echo "=== Running all examples ==="
+	@echo "\n[1/5] Running email analysis example..."
+	@$(PYTHON) examples/01_email_analysis.py || echo "Skipping..."
+	@echo "\n[2/5] Running IMAP email processor example..."
+	@$(PYTHON) examples/02_imap_email_processor.py || echo "Skipping..."
+	@echo "\n[3/5] Running email organizer example..."
+	@$(PYTHON) examples/03_email_organizer.py || echo "Skipping..."
+	@echo "\n[4/5] Running email summarizer example..."
+	@$(PYTHON) examples/04_email_summarizer.py || echo "Skipping..."
+	@echo "\n[5/5] Running command line IMAP example..."
+	@$(PYTHON) examples/05_command_line_imap.py --limit 2 || echo "Skipping..."
+	@echo "\n=== All examples completed ==="
+
+# Run command line IMAP example
+.PHONY: example-cmd
+# Example: make example-cmd IMAP_SERVER=imap.example.com IMAP_EMAIL=user@example.com IMAP_PASSWORD=pass
+example-cmd: example-env
+	@echo "Running command line IMAP example..."
+	@$(PYTHON) examples/05_command_line_imap.py \
+		--imap-server $(or $(IMAP_SERVER),$(shell grep -E '^IMAP_SERVER=' .env | cut -d= -f2-)) \
+		--email $(or $(IMAP_EMAIL),$(shell grep -E '^IMAP_EMAIL=' .env | cut -d= -f2-)) \
+		--password $(or $(IMAP_PASSWORD),$(shell grep -E '^IMAP_PASSWORD=' .env | cut -d= -f2-)) \
+		--limit 5
+
+# Run with Docker Compose
+.PHONY: docker-up
+docker-up:
+	@if [ ! -f docker-compose.yml ]; then \
+		cp examples/docker-compose.example.yml docker-compose.yml; \
+		echo "Created docker-compose.yml from example. Please edit it with your settings."; \
+		exit 1; \
+	fi
+	@if ! grep -q 'IMAP_SERVER=' docker-compose.yml || ! grep -q 'IMAP_EMAIL=' docker-compose.yml || ! grep -q 'IMAP_PASSWORD=' docker-compose.yml; then \
+		echo "Error: Please configure IMAP settings in docker-compose.yml"; \
+		exit 1; \
+	fi
+	docker-compose up -d
+	@echo "\nDocker containers started. Check logs with: make docker-logs"
+
+# View Docker logs
+.PHONY: docker-logs
+docker-logs:
+	docker-compose logs -f
+
+# Stop Docker containers
+.PHONY: docker-down
+docker-down:
+	docker-compose down
+
+# Create .env from example if it doesn't exist
+example-env:
+	@if [ ! -f .env ]; then \
+		cp examples/.env.example .env; \
+		echo "Created .env from example. Please edit it with your settings."; \
+		exit 1; \
+	fi
+	@if ! grep -q 'IMAP_SERVER=' .env || ! grep -q 'IMAP_EMAIL=' .env || ! grep -q 'IMAP_PASSWORD=' .env; then \
+		echo "Error: Please configure IMAP settings in .env"; \
+		exit 1; \
+	fi
+
+# Add examples to help
+help-examples:
+	@echo "Available dun command examples:"
+	@echo "  make examples            - Run all examples (requires .env configuration)"
+	@echo "  make example-cmd         - Run command line IMAP example (requires IMAP_* env vars)"
+	@echo "  make docker-up           - Start Docker containers (requires docker-compose.yml)"
+	@echo "  make docker-logs        - View Docker container logs"
+	@echo "  make docker-down        - Stop Docker containers"
+
 # Add examples to help
 help: help-examples
 
