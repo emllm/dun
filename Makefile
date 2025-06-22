@@ -10,7 +10,7 @@ POETRY := poetry
 PYTHON := python3
 PYTHON_SRC := src/$(PROJECT_NAME)
 
-.PHONY: install test lint clean build publish docs start-server test-message test-api test-cli
+.PHONY: install test lint clean build publish docs start-server test-message test-api test-cli push
 
 # Install dependencies and package
 install:
@@ -30,6 +30,11 @@ test-api:
 .PHONY: test-cli
 test-cli:
 	$(PYTHON) -m pytest tests/test_cli.py
+
+# Push changes to the remote repository
+.PHONY: push
+push:
+	git push origin $(shell git rev-parse --abbrev-ref HEAD)
 
 # Run validator tests
 .PHONY: test-validator
