@@ -22,6 +22,8 @@ class ProcessorConfig(BaseModel):
     code_template: str
 
 
+from dun.processor_engine_stdlib import is_stdlib_module
+
 class DynamicPackageManager:
     """Menedżer dynamicznego instalowania pakietów."""
 
@@ -32,17 +34,18 @@ class DynamicPackageManager:
         """Instaluje pakiet jeśli nie jest zainstalowany."""
         if package_name in self.installed_packages:
             return True
-
+        if is_stdlib_module(package_name):
+            logger.info(f"Pominięto instalację pakietu standardowej biblioteki: {package_name}")
+            self.installed_packages.add(package_name)
+            return True
         try:
             logger.info(f"Instalowanie pakietu: {package_name}")
             subprocess.check_call([
                 sys.executable, "-m", "pip", "install", package_name
             ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
             self.installed_packages.add(package_name)
             logger.success(f"Pakiet {package_name} zainstalowany pomyślnie")
             return True
-
         except subprocess.CalledProcessError as e:
             logger.error(f"Błąd instalacji pakietu {package_name}: {e}")
             return False

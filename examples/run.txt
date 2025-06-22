@@ -1,3 +1,6 @@
+# Przykłady codziennych zadań biurowych do testowania automatycznego mapowania i obsługi credentials
+
+# EMAIL/IMAP
 pokaż 10 najnowszych emaili
 znajdź emaile od jan@example.com
 pokaż nieprzeczytane wiadomości
@@ -8,5 +11,40 @@ znajdź wiadomości z załącznikami większymi niż 5MB
 pokaż statystyki skrzynki odbiorczej
 policz wiadomości w folderze Archiwum
 znajdź duplikaty wiadomości
+
+# KALENDARZ
 zaimportuj wydarzenia z pliku ICS
+utwórz spotkanie na jutro o 10:00 z zespołem
+usuń wszystkie wydarzenia z przeszłości
+
+# CSV/DANE
+połącz wszystkie pliki CSV z folderu "dane"
+wyeksportuj dane z pliku Excel do CSV
 wygeneruj raport wydatków z załączników
+policz sumę kolumny "koszty" w pliku raport.csv
+
+# HTTP API
+pobierz dane pogodowe z API OpenWeather
+wyślij żądanie POST do https://api.example.com/data
+sprawdź status serwera pod adresem https://status.example.com
+
+# BAZA DANYCH
+wykonaj zapytanie SELECT * FROM users w lokalnej bazie SQLite
+zaktualizuj rekord użytkownika o id=5
+utwórz kopię zapasową bazy danych
+
+# CREDENTIALS/TOKENS
+pobierz token API z pliku .env
+poproś użytkownika interaktywnie o hasło do IMAP
+wykorzystaj Bitwarden do pobrania hasła do bazy danych
+sprawdź, czy wszystkie wymagane credentials są ustawione
+
+# BITWARDEN/SECURE STORAGE
+zaloguj się do lokalnej instancji Bitwarden
+pobierz login i hasło do serwisu https://intranet.example.com z Bitwarden
+zapisz nowy token API do Bitwarden
+
+# TESTY USŁUG I CREDENTIALS
+przetestuj połączenie z serwerem IMAP
+przetestuj autoryzację do API z aktualnym tokenem
+przetestuj połączenie do bazy danych SQLite
