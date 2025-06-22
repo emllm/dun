@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+from unittest.mock import patch
 
 from dun.__main__ import main as dun_main
 from dun.llm_analyzer import LLMAnalyzer
@@ -74,7 +75,8 @@ class TestCSVProcessorIntegration:
             with patch('dun.llm_analyzer.LLMAnalyzer.analyze_request') as mock_analyze:
                 # Make sure we use our CSV processor
                 mock_analyze.return_value = LLMAnalyzer()._get_csv_processor()
-                dun_main()
+                with pytest.raises(SystemExit):
+                    dun_main()
         
         # Capture output
         captured = capsys.readouterr()
@@ -103,7 +105,8 @@ class TestCSVProcessorIntegration:
             with patch('dun.llm_analyzer.LLMAnalyzer.analyze_request') as mock_analyze:
                 # Make sure we use our CSV processor
                 mock_analyze.return_value = LLMAnalyzer()._get_csv_processor()
-                dun_main()
+                with pytest.raises(SystemExit):
+                    dun_main()
         
         # Verify the output file was created
         assert os.path.exists(output_file)
@@ -122,7 +125,8 @@ class TestCSVProcessorIntegration:
             f.write("id,text\n1,zażółć gęślą jaźń\n2,łódź jeża\n")
         
         # Process the files
-        processor = ProcessorEngine()
+        from dun.llm_analyzer import LLMAnalyzer
+        processor = ProcessorEngine(llm_analyzer=LLMAnalyzer())
         result = processor.process_natural_request("process csv files")
         
         # Verify the output
