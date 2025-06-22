@@ -3,6 +3,7 @@ venv
 .env
 poetry.lock
 .html
+vw-data
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
