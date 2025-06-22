@@ -81,14 +81,14 @@ class TestLLMAnalyzer:
         analyzer = LLMAnalyzer()
         result = analyzer.analyze_request("test request")
         
-        assert result.name == "imap_email_downloader"
-        assert "imap" in result.code_template.lower()
+        assert result.name == "csv_processor"
+        assert "pandas" in result.dependencies
 
     def test_get_default_imap_processor(self):
-        """Test getting default IMAP processor config."""
+        """Test getting default processor config (now CSV)."""
         analyzer = LLMAnalyzer()
         config = analyzer._get_default_imap_processor()
         
-        assert config.name == "imap_email_downloader"
-        assert "imap" in config.code_template.lower()
-        assert "email" in config.dependencies
+        assert config.name == "csv_processor"
+        assert "pandas" in config.dependencies
+        assert "csv" in config.code_template.lower()

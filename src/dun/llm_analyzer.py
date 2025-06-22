@@ -280,12 +280,13 @@ except Exception as e:
     raise
 
 # Pokaż podsumowanie
-print('\\n' + '='*50)
+print('\n' + '='*50)
 print(f'Przetworzono {len(csv_files)} plików CSV')
 print(f'Łączna liczba wierszy: {len(combined_df)}')
-print(f'Kolumny: {", ".join(combined_df.columns)}')
+columns = ", ".join(combined_df.columns)
+print(f'Kolumny: {columns}')
 print(f'Wynik zapisano w: {output_file}')
-print('='*50 + '\\n')
+print('='*50 + '\n')
 """
         )
         
