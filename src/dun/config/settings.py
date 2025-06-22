@@ -1,26 +1,51 @@
 """Configuration management for the application."""
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple, Type
 
 from dotenv import load_dotenv
-from pydantic import Field, validator
-from pydantic.env_settings import SettingsSourceCallable
-from pydantic_settings import BaseSettings
+from pydantic import Field, field_validator, ConfigDict
+from pydantic.fields import FieldInfo
+from pydantic_settings import BaseSettings, SettingsConfigDict, PydanticBaseSettingsSource
 
 from dun.core.protocols import ConfigProtocol
 
 
-def env_file_settings(settings: BaseSettings) -> Dict[str, Any]:
-    """Load settings from .env file."""
-    env_path = Path.cwd() / '.env'
-    if env_path.exists():
-        load_dotenv(dotenv_path=env_path)
-    return {}
+class EnvSettingsSource(PydanticBaseSettingsSource):
+    """Custom settings source that loads from .env file."""
+    
+    def get_field_value(self, field: FieldInfo, field_name: str) -> tuple[Any, str, bool]:
+        """Get field value from environment variables."""
+        # Load .env file if it exists
+        env_path = Path.cwd() / '.env'
+        if env_path.exists():
+            load_dotenv(dotenv_path=env_path, override=True)
+        
+        # Get the value from environment variables
+        env_val = os.environ.get(field_name.upper())
+        if env_val is not None:
+            return env_val, field_name, False
+            
+        # Try with the field's alias if it exists
+        if field.alias and field.alias != field_name:
+            env_val = os.environ.get(field.alias.upper())
+            if env_val is not None:
+                return env_val, field.alias, False
+                
+        return None, field_name, False
 
 
 class AppSettings(BaseSettings, ConfigProtocol):
     """Application settings with support for environment variables and .env files."""
+    
+    # Pydantic v2 model config
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_nested_delimiter="__",
+        case_sensitive=True,
+        extra="ignore",
+    )
     
     # Application settings
     APP_NAME: str = "Dun"
@@ -28,10 +53,10 @@ class AppSettings(BaseSettings, ConfigProtocol):
     DEBUG: bool = False
     
     # File system settings
-    BASE_DIR: Path = Path.cwd()
-    DATA_DIR: Path = BASE_DIR / "data"
-    LOGS_DIR: Path = BASE_DIR / "logs"
-    CACHE_DIR: Path = BASE_DIR / ".cache"
+    BASE_DIR: Path = Field(default_factory=Path.cwd)
+    DATA_DIR: Path = Field(default_factory=lambda: Path.cwd() / "data")
+    LOGS_DIR: Path = Field(default_factory=lambda: Path.cwd() / "logs")
+    CACHE_DIR: Path = Field(default_factory=lambda: Path.cwd() / ".cache")
     
     # Ollama settings
     OLLAMA_ENABLED: bool = True
@@ -46,26 +71,28 @@ class AppSettings(BaseSettings, ConfigProtocol):
     LOG_LEVEL: str = "INFO"
     LOG_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        
-        @classmethod
-        def customise_sources(
-            cls,
-            init_settings: SettingsSourceCallable,
-            env_settings: SettingsSourceCallable,
-            file_secret_settings: SettingsSourceCallable,
-        ) -> tuple[SettingsSourceCallable, ...]:
-            """Customize settings sources."""
-            return env_file_settings, env_settings, init_settings, file_secret_settings
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: Type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> Tuple[PydanticBaseSettingsSource, ...]:
+        """Customize settings sources with our custom env source."""
+        return (EnvSettingsSource(settings_cls),)
     
-    @validator("BASE_DIR", "DATA_DIR", "LOGS_DIR", "CACHE_DIR", pre=True)
+    @field_validator("BASE_DIR", "DATA_DIR", "LOGS_DIR", "CACHE_DIR", mode="before")
+    @classmethod
     def ensure_paths_exist(cls, v: Path) -> Path:
         """Ensure directories exist."""
-        v = Path(v).resolve()
-        v.mkdir(parents=True, exist_ok=True)
-        return v
+        if v is None:
+            return v
+            
+        path = Path(v).resolve()
+        path.mkdir(parents=True, exist_ok=True)
+        return path
     
     def get(self, key: str, default: Any = None) -> Any:
         """Get a configuration value."""
