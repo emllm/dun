@@ -10,3 +10,10 @@ services:
       - ./vw-data:/data
     environment:
       - ADMIN_TOKEN=${ADMIN_TOKEN}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    # Użytkownik zostanie utworzony automatycznie przez entrypoint-init.sh

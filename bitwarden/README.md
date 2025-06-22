@@ -32,7 +32,64 @@ Panel administratora: [http://localhost:8082/admin](http://localhost:8082/admin)
 
 Po pierwszym uruchomieniu przejdź do panelu i utwórz konto (np. `test@example.com`, hasło `Test1234!`) lub użyj wartości z `.env`. Zaloguj się i dodaj wpis do sejfu (np. login/hasło do https://intranet).
 
-## 3. Automatyczne dodawanie przykładowych danych
+## 3. Logowanie do Bitwarden CLI i odblokowanie sejfu
+
+**UWAGA:** Wszystkie skrypty wymagają aktywnego pliku `session.txt` (odblokowany sejf przez CLI Bitwarden). Jeśli go nie ma, zobaczysz komunikat o błędzie!
+
+### Automatyczne logowanie i utworzenie session.txt
+
+Możesz użyć automatycznego skryptu:
+
+```bash
+python3 login_bitwarden_cli.py
+```
+
+Skrypt pobiera dane z pliku `.env` (zmienne `BW_SERVER`, `BW_EMAIL`, `BW_PASSWORD`) lub poprosi o nie interaktywnie.
+
+Zmienne środowiskowe:
+- `BW_SERVER` — adres serwera Bitwarden (domyślnie `http://localhost:8082`)
+- `BW_EMAIL` — email do konta Bitwarden
+- `BW_PASSWORD` — hasło główne
+
+---
+
+Możesz też wykonać ręcznie:
+
+```bash
+bw config server http://localhost:8082  # lub inny port z .env
+bw login test@example.com Test1234!      # lub własne dane
+bw unlock --raw > session.txt           # zapisuje session_id do pliku
+```
+
+## 4. Automatyczne dodawanie przykładowych danych
+
+Aby dodać przykładowe dane logowania do popularnych serwisów (intranet, gmail, outlook, github):
+
+```bash
+make populate
+```
+
+Aby dodać dane social media z .env (facebook, twitter, linkedin):
+
+```bash
+make populate_social
+```
+
+## 5. Przeglądanie danych z sejfu
+
+Aby wyświetlić wszystkie wpisy:
+
+```bash
+make show
+```
+
+Aby wyświetlić tylko dane social media:
+
+```bash
+make show_social
+```
+
+## 6. Automatyczne dodawanie przykładowych danych
 
 Aby dodać przykładowe dane logowania do popularnych serwisów (intranet, gmail, outlook, github), użyj skryptu:
 
