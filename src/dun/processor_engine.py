@@ -86,17 +86,25 @@ class ProcessorEngine:
     def _execute_processor(self, config: ProcessorConfig) -> Dict[str, Any]:
         """Wykonuje procesor danych na podstawie konfiguracji."""
 
-        # Przygotuj kontekst wykonania
+        # Import required modules
+        import os
+        import sys
+        import pandas as pd
+        from pathlib import Path
+        
+        # Prepare execution context with all necessary modules and variables
         execution_context = {
-            'os': __import__('os'),
-            'sys': __import__('sys'),
+            'os': os,
+            'sys': sys,
+            'pd': pd,
             'Path': Path,
             'logger': logger,
             'output_dir': str(self.output_dir),
             'package_manager': self.package_manager,
+            'result': None,  # Will store the final result
         }
 
-        # Dodaj zmienne środowiskowe
+        # Add environment variables to context
         for key, value in os.environ.items():
             if key.startswith(('IMAP_', 'EMAIL_', 'SMTP_')):
                 execution_context[key.lower()] = value

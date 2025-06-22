@@ -89,6 +89,54 @@ start-server:
 test-message:
 	$(PYTHON) -m emllm.cli parse "From: test@example.com\nTo: recipient@example.com\nSubject: Test\n\nHello World"
 
+# Run dun with example email processing
+.PHONY: example-email-process
+example-email-process:
+	$(PYTHON) run_dun.py
+
+# Example: Process emails from IMAP and organize by date
+.PHONY: example-imap-process
+example-imap-process:
+	@echo "Processing emails from IMAP and organizing by date..."
+	$(PYTHON) -c "from dun.processor_engine import ProcessorEngine; from dun.llm_analyzer import LLMAnalyzer; \
+	llm = LLMAnalyzer(base_url='http://localhost:11434', model='mistral:7b'); \
+	engine = ProcessorEngine(llm); \
+	engine.process_natural_request('Pobierz wiadomości email z IMAP i posortuj je w folderach według daty (rok.miesiąc)')"
+
+# Example: Analyze email content using LLM
+.PHONY: example-analyze-email
+example-analyze-email:
+	@echo "Analyzing email content using LLM..."
+	$(PYTHON) -c "from dun.llm_analyzer import LLMAnalyzer; \
+	llm = LLMAnalyzer(base_url='http://localhost:11434', model='mistral:7b'); \
+	result = llm.analyze('Przeanalizuj tę wiadomość i wyodrębnij najważniejsze informacje: \n\nWitaj, chciałbym umówić się na spotkanie w przyszłym tygodniu. Proszę o potwierdzenie dostępności. Z poważaniem, Jan Kowalski'); \
+	print('Analysis result:', result)"
+
+# Example: Run with custom request from command line
+.PHONY: example-custom-request
+example-custom-request:
+	@echo "Running custom request..."
+	@read -p "Enter your request: " request; \
+	$(PYTHON) -c "from dun.processor_engine import ProcessorEngine; from dun.llm_analyzer import LLMAnalyzer; \
+	llm = LLMAnalyzer(base_url='http://localhost:11434', model='mistral:7b'); \
+	engine = ProcessorEngine(llm); \
+	print('Processing request:', '$$request'); \
+	result = engine.process_natural_request('$$request'); \
+	print('\nResult:', result)"
+
+# List all available examples
+.PHONY: examples
+help-examples:
+	@echo "Available dun command examples:"
+	@echo "  make example-email-process    - Run default email processing"
+	@echo "  make example-imap-process    - Process emails from IMAP and organize by date"
+	@echo "  make example-analyze-email   - Analyze email content using LLM"
+	@echo "  make example-custom-request  - Run with custom request (interactive)"
+
+# Add examples to help
+help: help-examples
+
+
 # Run full test suite
 .PHONY: test-all
 test-all: lint type-check test

@@ -3,6 +3,7 @@ Analizator LLM do interpretacji żądań w języku naturalnym.
 """
 
 import json
+import os
 import requests
 from typing import Dict, Any
 from loguru import logger
@@ -30,13 +31,17 @@ class LLMAnalyzer:
 
     def analyze_request(self, request: str) -> ProcessorConfig:
         """Analizuje żądanie i zwraca konfigurację procesora."""
+        self.last_request = request  # Store the last request for processing
 
-        # Spróbuj użyć LLM
-        try:
-            return self._analyze_with_llm(request)
-        except Exception as e:
-            logger.warning(f"LLM niedostępny ({e}), używanie domyślnego szablonu")
-            return self._get_default_imap_processor()
+        # Spróbuj użyć LLM jeśli dostępny
+        if os.getenv("OLLAMA_ENABLED", "false").lower() == "true":
+            try:
+                return self._analyze_with_llm(request)
+            except Exception as e:
+                logger.warning(f"LLM niedostępny ({e}), używanie domyślnego procesora")
+        
+        # Użyj odpowiedniego domyślnego procesora
+        return self._get_default_imap_processor()
 
     def _analyze_with_llm(self, request: str) -> ProcessorConfig:
         """Analizuje żądanie za pomocą LLM."""
@@ -96,7 +101,73 @@ Kod powinien:
         return ProcessorConfig(**config_data)
 
     def _get_default_imap_processor(self) -> ProcessorConfig:
-        """Zwraca domyślny procesor IMAP jako fallback."""
+        """Zwraca domyślny procesor jako fallback."""
+        
+        # Always use CSV processor for now since we're focusing on CSV processing
+        return self._get_csv_processor()
+        
+        # This code is kept for future reference when we want to support multiple processors
+        # # Sprawdź czy żądanie dotyczy CSV
+        # if any(keyword in self.last_request.lower() for keyword in ['csv', 'plik', 'dane', 'dataset', 'excel']):
+        #     return self._get_csv_processor()
+            
+        # # Domyślnie zwróć procesor IMAP
+        # return self._get_imap_processor()
+        
+    def _get_csv_processor(self) -> ProcessorConfig:
+        """Zwraca konfigurację procesora CSV."""
+        return ProcessorConfig(
+            name="csv_processor",
+            description="Procesor łączący pliki CSV w jeden zbiór danych",
+            dependencies=["pandas"],
+            parameters={"input_dir": "data/", "output_file": "output/combined.csv"},
+            code_template="""
+import os
+import pandas as pd
+from pathlib import Path
+
+input_dir = os.getenv('INPUT_DIR', 'data/')
+output_file = os.getenv('OUTPUT_FILE', 'output/combined.csv')
+
+# Utwórz katalog wyjściowy jeśli nie istnieje
+Path(output_file).parent.mkdir(parents=True, exist_ok=True)
+
+# Znajdź wszystkie pliki CSV w katalogu
+csv_files = [f for f in Path(input_dir).glob('**/*') if f.suffix.lower() == '.csv']
+
+if not csv_files:
+    raise ValueError(f"Nie znaleziono plików CSV w katalogu {input_dir}")
+
+# Wczytaj i połącz wszystkie pliki CSV
+dfs = []
+for file in csv_files:
+    logger.info(f"Przetwarzanie pliku: {file}")
+    df = pd.read_csv(file)
+    dfs.append(df)
+
+if not dfs:
+    raise ValueError("Nie udało się wczytać żadnych danych")
+
+# Połącz wszystkie ramki danych
+combined_df = pd.concat(dfs, ignore_index=True)
+
+# Zapisz wynik
+combined_df.to_csv(output_file, index=False)
+logger.success(f"Zapisano połączony zbiór danych do: {output_file}")
+
+# Zwróć informacje o przetworzonych danych
+result = {
+    "status": "success",
+    "input_files": [str(f) for f in csv_files],
+    "output_file": output_file,
+    "rows_processed": len(combined_df),
+    "columns": list(combined_df.columns)
+}
+"""
+        )
+        
+    def _get_imap_processor(self) -> ProcessorConfig:
+        """Zwraca domyślny procesor IMAP."""
 
         code_template = '''
 import imaplib
