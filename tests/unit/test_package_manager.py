@@ -44,7 +44,7 @@ class TestDynamicPackageManager:
 
     @patch('importlib.import_module')
     def test_import_module_success(self, mock_import_module):
-        """Test successful module import."""
+        """Test successful module import without needing installation."""
         mock_module = MagicMock()
         mock_import_module.return_value = mock_module
         
@@ -54,7 +54,8 @@ class TestDynamicPackageManager:
         
         assert result == mock_module
         mock_import_module.assert_called_once_with("test_module")
-        mock_install.assert_called_once_with("test_module")
+        # install_package should not be called if import succeeds on first try
+        mock_install.assert_not_called()
 
     @patch('importlib.import_module')
     def test_import_module_install_failure(self, mock_import_module):

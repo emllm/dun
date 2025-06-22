@@ -64,8 +64,17 @@ class ProcessorEngine:
     def __init__(self, llm_analyzer):
         self.llm_analyzer = llm_analyzer
         self.package_manager = DynamicPackageManager()
-        self.output_dir = Path(os.getenv("OUTPUT_DIR", "./output"))
-        self.output_dir.mkdir(exist_ok=True)
+        
+        # Get output directory from environment or use default
+        output_dir = os.getenv("OUTPUT_DIR")
+        if not output_dir:
+            # Default to ./output in current working directory
+            self.output_dir = Path.cwd() / "output"
+        else:
+            self.output_dir = Path(output_dir)
+            
+        # Create directory and parents if they don't exist
+        self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def process_natural_request(self, request: str) -> Dict[str, Any]:
         """Przetwarza żądanie w języku naturalnym."""

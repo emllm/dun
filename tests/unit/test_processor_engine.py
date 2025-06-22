@@ -11,22 +11,51 @@ from dun.processor_engine import ProcessorEngine, ProcessorConfig, DynamicPackag
 class TestProcessorEngine:
     """Test cases for ProcessorEngine."""
 
-    def test_init_default_output_dir(self, tmp_path, mock_llm_analyzer):
+    @patch('os.getenv')
+    def test_init_default_output_dir(self, mock_getenv, tmp_path, mock_llm_analyzer):
         """Test initialization with default output directory."""
-        with patch('os.getenv', return_value=None):
+        # Mock getenv to return None for OUTPUT_DIR
+        mock_getenv.return_value = None
+        
+        # Create a temporary directory and change to it for the test
+        original_cwd = os.getcwd()
+        os.chdir(tmp_path)
+        
+        try:
+            # Test that the output directory is created in the current working directory
             engine = ProcessorEngine(mock_llm_analyzer)
             
-        assert engine.output_dir == Path.cwd() / "output"
-        assert engine.output_dir.exists()
+            expected_dir = Path.cwd() / "output"
+            assert engine.output_dir == expected_dir
+            assert engine.output_dir.exists()
+            assert engine.output_dir.is_dir()
+        finally:
+            # Restore the original working directory
+            os.chdir(original_cwd)
 
-    def test_init_custom_output_dir(self, tmp_path, mock_llm_analyzer):
+    @patch('os.getenv')
+    def test_init_custom_output_dir(self, mock_getenv, tmp_path, mock_llm_analyzer):
         """Test initialization with custom output directory."""
         custom_dir = tmp_path / "custom_output"
-        with patch('os.getenv', return_value=str(custom_dir)):
-            engine = ProcessorEngine(mock_llm_analyzer)
+        
+        # Mock getenv to return our custom directory
+        def getenv_side_effect(key, default=None):
+            if key == "OUTPUT_DIR":
+                return str(custom_dir)
+            return os.environ.get(key, default)
             
+        mock_getenv.side_effect = getenv_side_effect
+        
+        # The directory shouldn't exist yet
+        assert not custom_dir.exists()
+        
+        # Create the engine, which should create the directory
+        engine = ProcessorEngine(mock_llm_analyzer)
+        
+        # Verify the directory was created and is accessible
         assert engine.output_dir == custom_dir
         assert engine.output_dir.exists()
+        assert engine.output_dir.is_dir()
 
     @patch('dun.processor_engine.exec')
     def test_execute_processor_success(self, mock_exec, processor_engine, tmp_path):
@@ -40,16 +69,24 @@ class TestProcessorEngine:
             code_template="result = {'status': 'success'}"
         )
         
+        # Create a test output directory
+        output_dir = tmp_path / "test_output"
+        output_dir.mkdir()
+        
+        # Patch the output_dir of the processor_engine
+        processor_engine.output_dir = output_dir
+        
         # Mock the execution context
         mock_context = {}
         
         def exec_side_effect(code, context):
+            # Update the context with expected values
             context.update({
                 'result': {'status': 'test_success'},
                 'os': os,
                 'Path': Path,
                 'logger': MagicMock(),
-                'output_dir': str(tmp_path),
+                'output_dir': str(output_dir),
                 'package_manager': MagicMock()
             })
             
@@ -73,6 +110,7 @@ class TestProcessorEngine:
         assert 'Path' in context
         assert 'logger' in context
         assert 'output_dir' in context
+        assert context['output_dir'] == str(output_dir)
         assert 'package_manager' in context
 
     @patch('dun.processor_engine.exec')
