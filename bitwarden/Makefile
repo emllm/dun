@@ -9,14 +9,14 @@
 
 PORT ?= 8082
 
+# Logowanie do Bitwarden CLI (nieinteraktywne, wymaga BW_EMAIL i BW_PASSWORD w .env)
 login:
 	python3 login_bitwarden_cli.py
 
 init-user:
 	@if docker ps | grep -q vaultwarden; then \
-	  cp entrypoint-init.sh vw-data/entrypoint-init.sh; \
-	  chmod +x vw-data/entrypoint-init.sh; \
-	  docker cp vw-data/entrypoint-init.sh vaultwarden:/data/entrypoint-init.sh; \
+	  docker cp entrypoint-init.sh vaultwarden:/data/entrypoint-init.sh; \
+	  docker exec vaultwarden chmod +x /data/entrypoint-init.sh; \
 	  docker exec vaultwarden /bin/sh /data/entrypoint-init.sh; \
 	else \
 	  echo "Vaultwarden nie działa. Uruchom najpierw: make up"; \
@@ -49,6 +49,14 @@ show:
 	@if [ -f session.txt ]; then \
 	  SESSION_ID=$$(cat session.txt); \
 	  bw list items --session "$$SESSION_ID" | jq '.'; \
+	else \
+	  echo "Brak session.txt. Zaloguj się do Bitwarden CLI i odblokuj sejf."; \
+	fi
+
+# Dodaj przykładowe dane do sejfu (intranet, gmail, outlook, github)
+populate:
+	@if [ -f session.txt ]; then \
+	  python3 populate_bitwarden.py; \
 	else \
 	  echo "Brak session.txt. Zaloguj się do Bitwarden CLI i odblokuj sejf."; \
 	fi

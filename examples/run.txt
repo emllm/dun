@@ -2,15 +2,9 @@
 
 # EMAIL/IMAP
 pokaż 10 najnowszych emaili
-znajdź emaile od jan@example.com
-pokaż nieprzeczytane wiadomości
 wyszukaj "ważna wiadomość" w tematach
-policz wiadomości z ostatniego tygodnia
 pokaż załączniki z ostatniego miesiąca
 znajdź wiadomości z załącznikami większymi niż 5MB
-pokaż statystyki skrzynki odbiorczej
-policz wiadomości w folderze Archiwum
-znajdź duplikaty wiadomości
 
 # KALENDARZ
 zaimportuj wydarzenia z pliku ICS
@@ -41,7 +35,7 @@ sprawdź, czy wszystkie wymagane credentials są ustawione
 
 # BITWARDEN/SECURE STORAGE
 zaloguj się do lokalnej instancji Bitwarden
-pobierz login i hasło do serwisu https://intranet.example.com z Bitwarden
+pobierz login i hasło do serwisu https://intranet z Bitwarden
 zapisz nowy token API do Bitwarden
 
 # TESTY USŁUG I CREDENTIALS

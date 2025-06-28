@@ -16,28 +16,28 @@ services:
       - DOVECOT_PASSWORD=testpass123
     command: dovecot -F
 
-  # Ollama dla LLM
-  ollama:
-    image: ollama/ollama:latest
-    ports:
-      - "21434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-    environment:
-      - OLLAMA_HOST=0.0.0.0
-    entrypoint: ["/bin/sh"]
-    command: >-
-      -c 'ollama serve &
-         sleep 10 &&
-         ollama pull mistral:7b &&
-         tail -f /dev/null'
+  # # Ollama dla LLM
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   ports:
+  #     - "21434:11434"
+  #   volumes:
+  #     - ollama_data:/root/.ollama
+  #   environment:
+  #     - OLLAMA_HOST=0.0.0.0
+  #   entrypoint: ["/bin/sh"]
+  #   command: >-
+  #     -c 'ollama serve &
+  #        sleep 10 &&
+  #        ollama pull mistral:7b &&
+  #        tail -f /dev/null'
 
   # Aplikacja główna
   dun:
     build: .
     depends_on:
       - mailserver
-      - ollama
+      # - ollama
     volumes:
       - .:/app
       - ./output:/app/output

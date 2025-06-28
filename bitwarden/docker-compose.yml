@@ -10,6 +10,8 @@ services:
       - ./vw-data:/data
     environment:
       - ADMIN_TOKEN=${ADMIN_TOKEN}
+      - BW_EMAIL=${BW_EMAIL}
+      - BW_PASSWORD=${BW_PASSWORD}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 10s

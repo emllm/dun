@@ -9,7 +9,7 @@ W folderze znajduje się plik `.env` z domyślnymi wartościami środowiskowymi 
 - `PORT=8082` – port na którym działa Vaultwarden (domyślnie 8082)
 - `ADMIN_TOKEN=admin1234` – token administratora (do panelu admin: `/admin`)
 - `BW_EMAIL=test@example.com` – przykładowy email użytkownika testowego
-- `BW_PASSWORD=Test1234!` – przykładowe hasło główne użytkownika testowego
+- `BW_PASSWORD=Test123456789` – przykładowe hasło główne użytkownika testowego
 
 Możesz zmienić te wartości przed uruchomieniem docker-compose.
 
@@ -30,7 +30,35 @@ Panel administratora: [http://localhost:8082/admin](http://localhost:8082/admin)
 
 ### Krok 2: Utwórz konto administratora lub użyj domyślnego
 
-Po pierwszym uruchomieniu przejdź do panelu i utwórz konto (np. `test@example.com`, hasło `Test1234!`) lub użyj wartości z `.env`. Zaloguj się i dodaj wpis do sejfu (np. login/hasło do https://intranet).
+**Po starcie kontenera Vaultwarden zalecana jest automatyzacja:**
+
+```bash
+make up
+make init-user   # tworzy domyślnego użytkownika z BW_EMAIL/BW_PASSWORD
+make login       # logowanie przez CLI/skrypt
+make populate    # opcjonalnie: załaduj przykładowe dane
+make show        # podgląd wpisów
+```
+
+Domyślny użytkownik (`BW_EMAIL`/`BW_PASSWORD` z .env) zostanie utworzony automatycznie przez `make init-user`. Te zmienne są przekazywane do kontenera Vaultwarden przez `docker-compose.yml` i wykorzystywane przez skrypt `entrypoint-init.sh`. Nie musisz tworzyć konta ręcznie przez WWW, chyba że chcesz inne dane.
+
+---
+
+### Resetowanie środowiska i naprawa błędów uprawnień
+
+Jeśli pojawi się błąd `'ContainerConfig'` lub inne problemy z uprawnieniami/kontenerem:
+
+```bash
+docker compose down
+sudo rm -rf vw-data
+make up
+make init-user
+```
+
+**Nie używaj chmod na vw-data!**
+Uprawnieniami zarządza Docker i ręczna zmiana może uszkodzić wolumin.
+
+---
 
 ## 3. Logowanie do Bitwarden CLI i odblokowanie sejfu
 
@@ -38,18 +66,18 @@ Po pierwszym uruchomieniu przejdź do panelu i utwórz konto (np. `test@example.
 
 ### Automatyczne logowanie i utworzenie session.txt
 
-Możesz użyć automatycznego skryptu:
+Możesz użyć automatycznego skryptu lub polecenia:
 
 ```bash
-python3 login_bitwarden_cli.py
+make login
 ```
 
-Skrypt pobiera dane z pliku `.env` (zmienne `BW_SERVER`, `BW_EMAIL`, `BW_PASSWORD`) lub poprosi o nie interaktywnie.
+**UWAGA:** Od teraz logowanie CLI jest w pełni nieinteraktywne — skrypt korzysta wyłącznie z danych w `.env` (`BW_EMAIL`, `BW_PASSWORD`). Jeśli nie są ustawione, skrypt zakończy się błędem i wyświetli czytelny komunikat.
 
 Zmienne środowiskowe:
 - `BW_SERVER` — adres serwera Bitwarden (domyślnie `http://localhost:8082`)
-- `BW_EMAIL` — email do konta Bitwarden
-- `BW_PASSWORD` — hasło główne
+- `BW_EMAIL` — email do konta Bitwarden (musi być ustawiony w .env)
+- `BW_PASSWORD` — hasło główne (musi być ustawione w .env)
 
 ---
 
@@ -57,7 +85,7 @@ Możesz też wykonać ręcznie:
 
 ```bash
 bw config server http://localhost:8082  # lub inny port z .env
-bw login test@example.com Test1234!      # lub własne dane
+bw login test@example.com Test123456789      # lub własne dane
 bw unlock --raw > session.txt           # zapisuje session_id do pliku
 ```
 

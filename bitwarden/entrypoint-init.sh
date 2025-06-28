@@ -3,7 +3,8 @@
 # Używa zmiennych BW_EMAIL i BW_PASSWORD z .env lub wartości domyślnych
 
 EMAIL="${BW_EMAIL:-test@example.com}"
-PASSWORD="${BW_PASSWORD:-Test1234!}"
+PASSWORD="${BW_PASSWORD:-Test123456789}"
+echo "[entrypoint-init] EMAIL=$EMAIL PASSWORD=$PASSWORD"
 DATA_DIR="/data"
 USERS_JSON="$DATA_DIR/users.json"
 
