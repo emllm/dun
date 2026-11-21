@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Lokalny serwer IMAP z przykładowymi emailami
   mailserver:
-    image: dovecot/dovecot:latest
+    image: dovecot/dovecot:latest@sha256:a2e908c9a93698f3923104ea5be7f4beacde9586242aff5d8059599d0042c62a
     ports:
       - "2143:143"
       - "2199:993"

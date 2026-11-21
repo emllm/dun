@@ -1,0 +1,84 @@
+{
+  "allowedPaths": [
+    "project/ticket-001/**",
+    "TODO.md",
+    "project/TICKETS.md",
+    ".governance/**",
+    "pyproject.toml",
+    ".gitattributes",
+    ".gitignore",
+    "CHANGELOG.md",
+    "VERSION",
+    "Dockerfile",
+    "docker-compose.yml"
+  ],
+  "classification": {
+    "kind": "SERVICE",
+    "origin": "health",
+    "priority": "P2"
+  },
+  "conflictsWith": [],
+  "delivery": {
+    "acceptedBaseSha": "3d8d8fc5968c3d09fc466a55f2a5a08ec92bbdc1",
+    "architecture": {
+      "components": [
+        {
+          "name": "governance-bootstrap",
+          "paths": [
+            "**"
+          ]
+        }
+      ],
+      "dataChanges": [],
+      "decision": "Install the published new-project 0.20.166 package via the pinned adopter and bind packaging metadata to it.",
+      "interfaceChanges": [],
+      "responsibilityChanges": false,
+      "rollback": "git revert",
+      "status": "accepted",
+      "ui": {
+        "evidence": [],
+        "impact": "none",
+        "states": []
+      }
+    },
+    "budgets": {
+      "maxAffectedComponents": 5,
+      "maxImplementationFiles": 15,
+      "maxPublicInterfaceChanges": 3,
+      "maxRuntimeDependencies": 3
+    },
+    "complexity": "L",
+    "estimatedMinutes": 45,
+    "nonGoals": [
+      "No product runtime behavior changes",
+      "No PyPI publication in this ticket"
+    ],
+    "outcome": "Adopt wellmanifest/new-project 0.20.166 native governance in emllm/dun and make the repository pass its governance gate.",
+    "runtimeDependencies": [],
+    "standardAdoption": {
+      "fromRevision": null,
+      "sourceRepository": "wellmanifest/new-project",
+      "toRevision": "c9bb73ce5ce861e78c26619e36e5b016fda56e2d"
+    },
+    "targetBranch": "main",
+    "validation": [
+      {
+        "commands": [
+          "./project/governance-check.sh --base origin/main --head HEAD"
+        ],
+        "criterion": "AC-01",
+        "evidence": "Scoped governance gate reports GOV-PASS."
+      }
+    ]
+  },
+  "dependsOn": [],
+  "forbiddenPaths": [
+    "project/ticket-*/user-*.md"
+  ],
+  "integrationTicket": null,
+  "schema": "new-project.intent/v3",
+  "stacks": [],
+  "summary": "Adopt native new-project governance",
+  "ticket": "ticket-001",
+  "workstream": "governance"
+}
