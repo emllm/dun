@@ -1,0 +1,108 @@
+{
+  "schema": "new-project.intent/v3",
+  "ticket": "ticket-004",
+  "summary": "Consolidate dune modules with uritime routing and bottlenecks fixes",
+  "workstream": "application",
+  "classification": {
+    "kind": "FEATURE",
+    "priority": "P1",
+    "origin": "requested"
+  },
+  "allowedPaths": [
+    "project/ticket-004/**",
+    "TODO.md",
+    "project/TICKETS.md",
+    "src/**",
+    "tests/**"
+  ],
+  "forbiddenPaths": [
+    "project/ticket-*/user-*.md"
+  ],
+  "stacks": [],
+  "dependsOn": [
+    "ticket-003"
+  ],
+  "conflictsWith": [],
+  "integrationTicket": "ticket-002",
+  "delivery": {
+    "acceptedBaseSha": "b5655a537116429d47eb337992a67557c217fc15",
+    "targetBranch": "main",
+    "outcome": "Consolidate emllm/dune modules (TaskConfigGenerator, TaskValidator, InteractiveMapper, SmartEnvManager) with uritime BM25-lite lexical routing, canonical distribution/module mapping, semcod/bottlenecks fixes, modular <500-line files, CLI route/config/validate subcommands, and offline tests/benchmarks into emllm/dun.",
+    "complexity": "L",
+    "estimatedMinutes": 50,
+    "budgets": {
+      "maxImplementationFiles": 15,
+      "maxAffectedComponents": 5,
+      "maxPublicInterfaceChanges": 3,
+      "maxRuntimeDependencies": 0
+    },
+    "runtimeDependencies": [],
+    "nonGoals": [
+      "No unapproved runtime dependencies beyond pyyaml added in ticket-002",
+      "No pre-existing untracked docs/README.md or errors/README.md modifications"
+    ],
+    "architecture": {
+      "status": "accepted",
+      "decision": "Consolidate dune modules cleanly under src/dun/ in <500-line cohesive modules, backed by uritime BM25-lite lexical routing and dun.packages distribution/module normalization, plus CLI route/config/validate subcommands.",
+      "components": [
+        {
+          "name": "dun-routing-and-packages",
+          "paths": [
+            "src/dun/routing.py",
+            "src/dun/packages.py",
+            "src/dun/processor_engine.py",
+            "src/dun/dynamic_processor_mapper.py"
+          ]
+        },
+        {
+          "name": "dun-config-and-validation",
+          "paths": [
+            "src/dun/config_generator.py",
+            "src/dun/task_validator.py"
+          ]
+        },
+        {
+          "name": "dun-mappers-and-env",
+          "paths": [
+            "src/dun/library_catalog.py",
+            "src/dun/interactive_mapper.py",
+            "src/dun/env_definitions.py",
+            "src/dun/smart_env_manager.py"
+          ]
+        },
+        {
+          "name": "dun-public-cli-and-tests",
+          "paths": [
+            "src/dun/__init__.py",
+            "src/dun/__main__.py",
+            "tests/integration/test_integration.py",
+            "tests/unit/test_consolidated_dune.py"
+          ]
+        }
+      ],
+      "responsibilityChanges": false,
+      "interfaceChanges": [
+        "Export lexical router, config generator, task validator, interactive mapper, env manager, and package resolver from dun.__init__",
+        "Add route, config, and validate subcommands to dun.__main__",
+        "Wire dun.packages availability checks into DynamicPackageManager and TaskValidator"
+      ],
+      "dataChanges": [],
+      "ui": {
+        "impact": "none",
+        "states": [],
+        "evidence": []
+      },
+      "rollback": "git revert"
+    },
+    "validation": [
+      {
+        "criterion": "AC-01",
+        "commands": [
+          "PYTHONPATH=src python3 -m pytest tests -o addopts=\"\" -q",
+          "./project/governance-check.sh --base origin/main --head HEAD"
+        ],
+        "evidence": "All existing 44 baseline tests and new consolidated dune/uritime/bottlenecks unit tests pass with 0 warnings, all src/dun/*.py files remain under 500 lines, offline benchmark achieves target accuracy with 0 duplicate pip installs, and governance-check reports GOV-PASS."
+      }
+    ]
+  }
+}
