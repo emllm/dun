@@ -1,10 +1,11 @@
 """Command-line interface for Dun."""
 import argparse
 import sys
-from typing import Optional, List
+from typing import List, Optional
 
-from .processor_engine import ProcessorEngine
+from . import __version__
 from .llm_analyzer import LLMAnalyzer
+from .processor_engine import ProcessorEngine
 
 
 def parse_args(args: Optional[List[str]] = None) -> argparse.Namespace:
@@ -61,7 +62,7 @@ def main(args: Optional[List[str]] = None) -> int:
             return handle_email_command(parsed_args)
         elif parsed_args.command == 'version':
             print("Dun - Dynamiczny Procesor Danych")
-            print("Wersja: 0.1.0")
+            print(f"Wersja: {__version__}")
             return 0
         else:
             print(f"Unknown command: {parsed_args.command}", file=sys.stderr)

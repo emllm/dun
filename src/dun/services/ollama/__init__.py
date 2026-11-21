@@ -1,14 +1,13 @@
 """Ollama service for interacting with LLM models."""
-import json
 import logging
-from dataclasses import dataclass
+import os
 from typing import Any, Dict, List, Optional, Union
 
 import requests
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from dun.core.protocols import ServiceProtocol
 from dun.config.settings import get_settings
+from dun.core.protocols import ServiceProtocol
 
 logger = logging.getLogger(__name__)
 
@@ -48,10 +47,17 @@ class OllamaService(ServiceProtocol):
     def name(self) -> str:
         return "ollama"
     
+    def _is_enabled(self) -> bool:
+        """Check whether Ollama is enabled, honoring runtime env overrides."""
+        override = os.getenv("OLLAMA_ENABLED")
+        if override is not None:
+            return override.strip().lower() in {"1", "true", "yes", "on"}
+        return bool(self.settings.OLLAMA_ENABLED)
+
     @property
     def is_available(self) -> bool:
         """Check if Ollama service is available."""
-        if not self.settings.OLLAMA_ENABLED:
+        if not self._is_enabled():
             return False
         
         try:
@@ -63,7 +69,7 @@ class OllamaService(ServiceProtocol):
     
     async def initialize(self) -> None:
         """Initialize the Ollama service."""
-        if not self.settings.OLLAMA_ENABLED:
+        if not self._is_enabled():
             logger.info("Ollama integration is disabled in settings")
             return
         
@@ -103,15 +109,32 @@ class OllamaService(ServiceProtocol):
         try:
             client = self._get_client()
             response = client.list()
-            
+
+            raw_models = (
+                response.get('models', [])
+                if isinstance(response, dict)
+                else getattr(response, 'models', []) or []
+            )
             self._models.clear()
-            for model_data in response.get('models', []):
+            for item in raw_models:
+                model_data = (
+                    item.model_dump()
+                    if hasattr(item, 'model_dump')
+                    else (dict(item) if isinstance(item, dict) else {})
+                )
+                details = model_data.get('details') or {}
+                if hasattr(details, 'model_dump'):
+                    details = details.model_dump()
+                elif not isinstance(details, dict):
+                    details = {}
+                model_name = model_data.get('model') or ''
+                name = model_data.get('name') or model_name
                 model = OllamaModelInfo(
-                    name=model_data.get('name', ''),
-                    model=model_data.get('model', ''),
-                    size=model_data.get('size', 0),
-                    digest=model_data.get('digest', ''),
-                    details=model_data.get('details', {})
+                    name=name,
+                    model=model_name or name,
+                    size=int(model_data.get('size') or 0),
+                    digest=model_data.get('digest') or '',
+                    details=details,
                 )
                 self._models[model.name] = model
                 

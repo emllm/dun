@@ -3,13 +3,12 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pandas as pd
 import pytest
 
-from dun.services.processors.csv_processor import CSVProcessor, CSVProcessingError
-from dun.config.settings import get_settings
+from dun.services.processors.csv_processor import CSVProcessor
+
 
 class TestCSVProcessor:
     """Test cases for the CSV processor service."""
@@ -64,9 +63,10 @@ class TestCSVProcessor:
         return CSVProcessor()
     
     @pytest.mark.asyncio
-    async def test_find_csv_files(self, setup_test_files, csv_processor):
+    async def test_find_csv_files(self, setup_test_files, csv_processor, tmp_path, monkeypatch):
         """Test finding CSV files in a directory."""
-        # Test with default input directory (should be empty)
+        monkeypatch.chdir(tmp_path)
+        # Test with default input directory (does not exist inside empty tmp_path)
         with pytest.raises(FileNotFoundError):
             await csv_processor.find_csv_files()
         

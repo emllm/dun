@@ -3,19 +3,16 @@
 A powerful tool for data processing and analysis with natural language interface
 and automatic environment diagnostics.
 """
-from pathlib import Path
-from typing import Optional
-
-from dun.config.settings import settings, get_settings
-from dun.core.contexts import get_context, ApplicationContext
+from dun.app import DunApplication, run
+from dun.config.settings import get_settings, settings
+from dun.core.contexts import ApplicationContext, get_context
 from dun.services.filesystem import FileSystemService, fs
 from dun.services.ollama import OllamaService, ollama_service
-from dun.app import DunApplication, run
 
 # Package metadata
 __version__ = "0.2.0"
 __author__ = "Tom Sapletta <info@softreck.dev>"
-__license__ = "MIT"
+__license__ = "Apache-2.0"
 
 # Initialize default services
 context: ApplicationContext = get_context()
@@ -45,5 +42,3 @@ __all__ = [
     '__author__',
     '__license__',
 ]
-
-__version__ = '0.1.1'

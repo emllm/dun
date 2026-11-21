@@ -1,16 +1,15 @@
 """Processor engine for managing and executing data processing tasks."""
-import asyncio
 import logging
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union
+from typing import Any, Dict, Optional, Type, TypeVar
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
+from dun.config.settings import get_settings
 from dun.core.contexts import get_context
 from dun.core.protocols import ServiceProtocol
-from dun.services.filesystem import fs
-from dun.services.processors import get_processor, CSVProcessor, CSVProcessingError
-from dun.config.settings import get_settings
+from dun.services.processors import CSVProcessingError, CSVProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -18,14 +17,14 @@ T = TypeVar('T', bound='ProcessorConfig')
 
 class ProcessorConfig(BaseModel):
     """Base configuration for processors."""
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     processor_type: str = "base"
     input_path: Optional[Path] = None
     output_path: Optional[Path] = None
-    
-    class Config:
-        arbitrary_types_allowed = True
-    
-    @validator('input_path', 'output_path', pre=True)
+
+    @field_validator('input_path', 'output_path', mode='before')
+    @classmethod
     def validate_paths(cls, v):
         if v is None or isinstance(v, Path):
             return v
@@ -50,6 +49,20 @@ class ProcessorEngine(ServiceProtocol):
         self.context = get_context()
         self._processors: Dict[str, Any] = {}
         self._initialized = False
+        self._stats: Dict[str, int] = {
+            "total_operations": 0,
+            "successful_operations": 0,
+            "failed_operations": 0,
+        }
+
+    def get_health_status(self) -> Dict[str, Any]:
+        """Return current initialization, registered processors, and stats."""
+        return {
+            "initialized": self._initialized,
+            "processors": list(self._processors.keys()),
+            "stats": dict(self._stats),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
     
     @property
     def name(self) -> str:
@@ -109,64 +122,73 @@ class ProcessorEngine(ServiceProtocol):
         **kwargs
     ) -> ProcessingResult:
         """Process data using the specified processor."""
-        try:
-            processor = self.get_processor(processor_type)
-            
-            # Merge config with processor defaults
-            processor_config = config or {}
-            
-            # Add any additional kwargs to the config
-            processor_config.update(kwargs)
-            
-            # Process the request
-            if processor_type == "csv":
-                if "request" in processor_config:
-                    # Handle natural language request
-                    result = await processor.process_csv_request(processor_config["request"])
-                    return ProcessingResult(
-                        success=result.get("status") == "success",
-                        message=result.get("message", ""),
-                        data=result,
-                        output_path=result.get("output_file")
-                    )
-                else:
-                    # Handle direct CSV processing
+        processor_config = dict(config or {})
+        processor_config.update(kwargs)
+        retry_attempts = max(0, int(processor_config.get("retry_attempts", 0) or 0))
+        self._stats["total_operations"] += 1
+
+        last_exc: Optional[Exception] = None
+        for attempt in range(retry_attempts + 1):
+            try:
+                processor = self.get_processor(processor_type)
+
+                if processor_type == "csv":
+                    if processor_config.get("input_path"):
+                        processor.config.input_dir = Path(str(processor_config["input_path"]))
+                    if processor_config.get("output_path"):
+                        processor.config.output_file = Path(str(processor_config["output_path"]))
+                    if "request" in processor_config:
+                        result = await processor.process_csv_request(processor_config["request"])
+                        ok = result.get("status") == "success"
+                        self._stats["successful_operations" if ok else "failed_operations"] += 1
+                        return ProcessingResult(
+                            success=ok,
+                            message=result.get("message", ""),
+                            data=result,
+                            output_path=result.get("output_file")
+                        )
                     output_file = await processor.combine_csv_files(
                         file_paths=processor_config.get("file_paths"),
-                        output_file=processor_config.get("output_file")
+                        output_file=processor_config.get("output_path") or processor_config.get("output_file")
                     )
+                    self._stats["successful_operations"] += 1
                     return ProcessingResult(
                         success=True,
                         message=f"Successfully processed {processor_type} files",
                         output_path=output_file
                     )
-            else:
-                # Generic processor handling
                 if hasattr(processor, 'process') and callable(processor.process):
                     result = await processor.process(processor_config)
+                    self._stats["successful_operations"] += 1
                     return ProcessingResult(
                         success=True,
                         message=f"Successfully processed with {processor_type} processor",
                         data=result
                     )
-                else:
-                    raise NotImplementedError(
-                        f"Processor {processor_type} does not implement a process method"
+                raise NotImplementedError(
+                    f"Processor {processor_type} does not implement a process method"
+                )
+            except CSVProcessingError as e:
+                last_exc = e
+                if attempt >= retry_attempts:
+                    self._stats["failed_operations"] += 1
+                    return ProcessingResult(
+                        success=False,
+                        message=f"CSV processing error: {e}",
+                        error=str(e)
                     )
-                    
-        except CSVProcessingError as e:
-            return ProcessingResult(
-                success=False,
-                message=f"CSV processing error: {e}",
-                error=str(e)
-            )
-        except Exception as e:
-            logger.exception(f"Error in {processor_type} processor")
-            return ProcessingResult(
-                success=False,
-                message=f"Error processing {processor_type} data: {e}",
-                error=str(e)
-            )
+            except Exception as e:
+                last_exc = e
+                logger.exception(f"Error in {processor_type} processor")
+                if attempt >= retry_attempts:
+                    self._stats["failed_operations"] += 1
+                    return ProcessingResult(
+                        success=False,
+                        message=f"Error processing {processor_type} data: {e}",
+                        error=str(e)
+                    )
+        self._stats["failed_operations"] += 1
+        return ProcessingResult(success=False, message=str(last_exc or "Unknown error"), error=str(last_exc))
     
     async def process_natural_request(self, request: str) -> ProcessingResult:
         """Process a natural language request by determining the appropriate processor."""

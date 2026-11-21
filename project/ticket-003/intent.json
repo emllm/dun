@@ -1,0 +1,74 @@
+{
+  "schema": "new-project.intent/v3",
+  "ticket": "ticket-003",
+  "summary": "Fix baseline version pydantic ollama cli and test suite",
+  "workstream": "application",
+  "classification": {
+    "kind": "BUG",
+    "priority": "P1",
+    "origin": "requested"
+  },
+  "allowedPaths": [
+    "project/ticket-003/**",
+    "TODO.md",
+    "project/TICKETS.md",
+    "src/**",
+    "tests/**"
+  ],
+  "forbiddenPaths": [
+    "project/ticket-*/user-*.md"
+  ],
+  "stacks": [],
+  "dependsOn": [],
+  "conflictsWith": [],
+  "integrationTicket": "ticket-002",
+  "delivery": {
+    "acceptedBaseSha": "31974a3bfb13dfde121b1428beac20f5ffc698b1",
+    "targetBranch": "main",
+    "outcome": "Fix dun baseline version/license metadata, Pydantic v2 validators/ConfigDict, OllamaService SDK compatibility and env override, CSV/ProcessorEngine retry/health/path handling, CLI __main__/cli behavior, and all 15 failing baseline tests so the entire test suite passes offline with zero warnings.",
+    "complexity": "L",
+    "estimatedMinutes": 45,
+    "budgets": {
+      "maxImplementationFiles": 15,
+      "maxAffectedComponents": 5,
+      "maxPublicInterfaceChanges": 1,
+      "maxRuntimeDependencies": 0
+    },
+    "runtimeDependencies": [],
+    "nonGoals": [
+      "No new emllm/dune modules ported yet (deferred to ticket-004)"
+    ],
+    "architecture": {
+      "status": "accepted",
+      "decision": "Repair broken package version, Pydantic v2 deprecations, Ollama client normalization, async ProcessorEngine retry/health/path mapping, CLI single-shot handling, and offline test isolation across src/ and tests/.",
+      "components": [
+        {
+          "name": "dun-core-cli",
+          "paths": [
+            "src/**",
+            "tests/**"
+          ]
+        }
+      ],
+      "responsibilityChanges": false,
+      "interfaceChanges": [],
+      "dataChanges": [],
+      "ui": {
+        "impact": "none",
+        "states": [],
+        "evidence": []
+      },
+      "rollback": "git revert"
+    },
+    "validation": [
+      {
+        "criterion": "AC-01",
+        "commands": [
+          "PYTHONPATH=src python3 -m pytest tests -o addopts=\"\" -q",
+          "./project/governance-check.sh --base origin/main --head HEAD"
+        ],
+        "evidence": "All 44 existing tests pass offline with 0 failures and 0 Pydantic deprecation warnings, and governance-check reports GOV-PASS."
+      }
+    ]
+  }
+}

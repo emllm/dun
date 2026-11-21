@@ -1,9 +1,10 @@
 """Integration tests for example use cases from EXAMPLE.md."""
-import os
 import json
-import pytest
+import os
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 from loguru import logger
 
 # Import the LLMAnalyzer and other necessary components
@@ -101,18 +102,23 @@ import json
 def mock_llm_response(*args, **kwargs):
     """Mock LLM response based on the prompt content."""
     prompt = kwargs.get('json', {}).get('prompt', '').lower()
-    
-    if 'imap' in prompt or 'email' in prompt or 'wiadomości' in prompt:
+    target_text = (
+        prompt.split('żądanie:', 1)[1].split('\n', 1)[0]
+        if 'żądanie:' in prompt
+        else prompt
+    )
+
+    if 'imap' in target_text or 'email' in target_text or 'wiadomości' in target_text:
         return MagicMock(
             status_code=200,
             json=lambda: {"response": json.dumps(MOCK_LLM_RESPONSES["imap"])}
         )
-    elif 'csv' in prompt or 'analiz' in prompt or 'statyst' in prompt:
+    elif 'csv' in target_text or 'analiz' in target_text or 'statyst' in target_text:
         return MagicMock(
             status_code=200,
             json=lambda: {"response": json.dumps(MOCK_LLM_RESPONSES["csv_analysis"])}
         )
-    elif 'web' in prompt or 'scrap' in prompt or 'stron' in prompt:
+    elif 'web' in target_text or 'scrap' in target_text or 'stron' in target_text:
         return MagicMock(
             status_code=200,
             json=lambda: {"response": json.dumps(MOCK_LLM_RESPONSES["web_scraping"])}
@@ -124,17 +130,16 @@ def mock_llm_response(*args, **kwargs):
         json=lambda: {"response": "{}"}
     )
 
+@patch('requests.get', return_value=MagicMock(status_code=200))
 @patch('requests.post', side_effect=mock_llm_response)
-def test_imap_email_processing(mock_post):
+def test_imap_email_processing(mock_post, _mock_get, monkeypatch):
     """Test IMAP email processing integration."""
-    # Arrange
+    monkeypatch.setenv("OLLAMA_ENABLED", "true")
     analyzer = LLMAnalyzer()
     request = "Pobierz wszystkie wiadomości email ze skrzynki IMAP i zapisz je w folderach uporządkowanych według roku i miesiąca"
-    
-    # Act
+
     config = analyzer.analyze_request(request)
-    
-    # Assert
+
     assert config.name == "imap_processor"
     assert "imaplib" in config.dependencies
     assert "email" in config.dependencies
@@ -143,34 +148,34 @@ def test_imap_email_processing(mock_post):
     assert "${IMAP_PASSWORD}" in config.parameters.values()
     assert "mail.select('${mailbox}')" in config.code_template
 
+
+@patch('requests.get', return_value=MagicMock(status_code=200))
 @patch('requests.post', side_effect=mock_llm_response)
-def test_csv_analysis_processing(mock_post):
+def test_csv_analysis_processing(mock_post, _mock_get, monkeypatch):
     """Test CSV analysis integration."""
-    # Arrange
+    monkeypatch.setenv("OLLAMA_ENABLED", "true")
     analyzer = LLMAnalyzer()
     request = "Przeanalizuj wszystkie pliki CSV w folderze data/, połącz je w jeden dataset i wygeneruj raport z podstawowymi statystykami"
-    
-    # Act
+
     config = analyzer.analyze_request(request)
-    
-    # Assert
+
     assert config.name == "csv_analyzer"
     assert "pandas" in config.dependencies
     assert "numpy" in config.dependencies
     assert "input_dir" in config.parameters
     assert "output_file" in config.parameters
 
+
+@patch('requests.get', return_value=MagicMock(status_code=200))
 @patch('requests.post', side_effect=mock_llm_response)
-def test_web_scraping_processing(mock_post):
+def test_web_scraping_processing(mock_post, _mock_get, monkeypatch):
     """Test web scraping integration."""
-    # Arrange
+    monkeypatch.setenv("OLLAMA_ENABLED", "true")
     analyzer = LLMAnalyzer()
     request = "Pobierz wszystkie artykuły z strony news.com, wyodrębnij tytuły i treść, a następnie zapisz w formacie JSON"
-    
-    # Act
+
     config = analyzer.analyze_request(request)
-    
-    # Assert
+
     assert config.name == "web_scraper"
     assert "requests" in config.dependencies
     assert "beautifulsoup4" in config.dependencies
