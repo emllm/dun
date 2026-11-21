@@ -20,7 +20,7 @@ class TestIntegration:
             {
                 "name": "test_processor",
                 "description": "Test processor",
-                "dependencies": ["pytest"],
+                "dependencies": ["dun-nonexistent-test-pkg"],
                 "parameters": {"test_param": "value"},
                 "code_template": "result = {'status': 'test_success'}"
             }
@@ -50,7 +50,7 @@ class TestIntegration:
         assert "Pobierz dane i zapisz w folderze wyjściowym" in call_args['prompt']
 
         mock_install.assert_called_once_with(
-            [sys.executable, "-m", "pip", "install", "pytest"],
+            [sys.executable, "-m", "pip", "install", "dun-nonexistent-test-pkg"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
