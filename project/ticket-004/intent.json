@@ -80,7 +80,7 @@
           ]
         }
       ],
-      "responsibilityChanges": true,
+      "responsibilityChanges": false,
       "interfaceChanges": [
         "Export lexical router, config generator, task validator, interactive mapper, env manager, and package resolver from dun.__init__",
         "Add route, config, and validate subcommands to dun.__main__",

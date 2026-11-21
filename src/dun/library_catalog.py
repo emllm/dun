@@ -57,7 +57,7 @@ def build_library_database() -> Dict[str, LibraryInterface]:
             param_descriptions={
                 "server": "Adres serwera IMAP (np. imap.gmail.com)",
                 "username": "Nazwa użytkownika/email",
-                "password": "Hasło do skrzynki",
+                "password": "Hasło IMAP",
                 "port": "Port serwera (143 dla IMAP, 993 dla IMAPS)",
                 "use_ssl": "Czy używać szyfrowania SSL",
                 "folder": "Folder do przetwarzania (domyślnie INBOX)",
@@ -66,7 +66,7 @@ def build_library_database() -> Dict[str, LibraryInterface]:
                 {
                     "server": "imap.gmail.com",
                     "username": "user@gmail.com",
-                    "password": "app_password",
+                    "password": "${IMAP_PASSWORD}",
                     "port": 993,
                     "use_ssl": True,
                 }
@@ -85,14 +85,14 @@ def build_library_database() -> Dict[str, LibraryInterface]:
                 "timeout": "int",
             },
             param_descriptions={
-                "database_url": "URL połączenia z bazą danych (postgresql://user:pass@host/db)",
+                "database_url": "URL połączenia z bazą danych (postgresql://user:<password>@host/db)",
                 "pool_size": "Rozmiar puli połączeń",
                 "echo": "Czy logować zapytania SQL",
                 "timeout": "Timeout połączenia w sekundach",
             },
             examples=[
                 {
-                    "database_url": "postgresql://user:password@localhost:5432/mydb",
+                    "database_url": "postgresql://user:${DB_PASSWORD}@localhost:5432/mydb",
                     "pool_size": 5,
                     "echo": False,
                 },
