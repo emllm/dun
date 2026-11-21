@@ -1,0 +1,65 @@
+{
+  "schema": "wellmanifest.poa/v1",
+  "process_id": "proc://emllm-dun/release/command/publish",
+  "version": "0.1.0",
+  "name": "Governed release of the dun package to PyPI",
+  "assurance": {
+    "declaration": "descriptive local release plan, not an issued grant or execution receipt",
+    "runtime_enforcement": "none; steps are executed by the operator or coding agent",
+    "s5_claimed": false
+  },
+  "execution_model": "Descriptive finite DAG. Publication happens only after the independent Validator merged the exact release head.",
+  "preconditions": [
+    "Release ticket merged to main by the independent Validator App",
+    "VERSION, pyproject.toml and CHANGELOG.md declare the same new version",
+    "PyPI credentials available to the operator for the dun project"
+  ],
+  "steps": [
+    {
+      "id": "verify-merge",
+      "operation": "git fetch origin main && git rev-parse origin/main",
+      "depends_on": [],
+      "rule": "Read back the Validator review and merge actor for the exact release head."
+    },
+    {
+      "id": "build",
+      "operation": "uv build --out-dir <scratch>/dist <clean export of origin/main>",
+      "depends_on": [
+        "verify-merge"
+      ],
+      "rule": "Build sdist and wheel from the merged commit only."
+    },
+    {
+      "id": "smoke-test",
+      "operation": "install the wheel in a fresh virtualenv, run pytest, and import every dun module",
+      "depends_on": [
+        "build"
+      ],
+      "rule": "Abort on any import or test failure."
+    },
+    {
+      "id": "tag",
+      "operation": "git tag -a v<VERSION> <merged-sha> && git push origin v<VERSION>",
+      "depends_on": [
+        "smoke-test"
+      ],
+      "rule": "Annotated tag on the merged commit."
+    },
+    {
+      "id": "publish",
+      "operation": "twine upload <scratch>/dist/*",
+      "depends_on": [
+        "tag"
+      ],
+      "rule": "Upload the exact artifacts that passed the smoke test; never reuse a version."
+    },
+    {
+      "id": "read-back",
+      "operation": "curl https://pypi.org/pypi/dun/<VERSION>/json",
+      "depends_on": [
+        "publish"
+      ],
+      "rule": "Confirm file hashes on PyPI match the built artifacts."
+    }
+  ]
+}

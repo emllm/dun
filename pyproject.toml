@@ -1,10 +1,15 @@
 [tool.poetry]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+]
 name = "dun"
-version = "0.1.16"
-description = "Dynamiczny procesor danych z automatycznym wykrywaniem bibliotek"
-authors = ["Tom Sapletta <info@softreck.dev>"]
+version = "0.2.0"
+description = "Dynamic Universal Tool (DUN) for AI-powered data processing with natural language interpretation, automatic library management, CSV analysis, and IMAP integration using local LLMs."
+authors = ["Tom Sapletta <tom@sapletta.com>"]
 readme = "README.md"
-license = "MIT"
+license = "Apache-2.0"
 packages = [
     { include = "dun", from = "src" },
 ]
@@ -118,3 +123,11 @@ per-file-ignores = [
     "**/urls.py: E128"
 ]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-p wellmanifest_governance -v --cov=dun --cov-report=term-missing"
+
+[tool.wellmanifest]
+standard = "0.20.166"
+revision = "c9bb73ce5ce861e78c26619e36e5b016fda56e2d"
+gate = "project/governance-check.sh"
