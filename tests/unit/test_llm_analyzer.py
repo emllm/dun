@@ -1,5 +1,4 @@
 """Tests for LLMAnalyzer class."""
-import json
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -84,7 +83,8 @@ class TestLLMAnalyzer:
         assert result.name == "csv_processor"
         assert "pandas" in result.dependencies
 
-    def test_get_default_imap_processor(self):
+    @patch('requests.get', side_effect=requests.RequestException("Offline in unit test"))
+    def test_get_default_imap_processor(self, _mock_get):
         """Test getting default processor config (now CSV)."""
         analyzer = LLMAnalyzer()
         config = analyzer._get_default_imap_processor()

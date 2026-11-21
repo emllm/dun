@@ -4,11 +4,13 @@ Analizator LLM do interpretacji żądań w języku naturalnym.
 
 import json
 import os
+
 import requests
-from typing import Dict, Any
 from loguru import logger
-from .processor_engine import ProcessorConfig
+
 from dun.dynamic_processor_mapper import DynamicProcessorMapper
+
+from .processor_engine import ProcessorConfig
 
 
 class LLMAnalyzer:
@@ -138,7 +140,8 @@ from pathlib import Path
 # Pobierz ścieżki z zmiennych środowiskowych lub użyj domyślnych
 logger.info("Inicjalizacja procesora CSV")
 input_dir = os.getenv('INPUT_DIR', 'data/')
-output_file = os.getenv('OUTPUT_FILE', 'output/combined.csv')
+output_dir_default = os.getenv('OUTPUT_DIR', 'output')
+output_file = os.getenv('OUTPUT_FILE') or os.path.join(output_dir_default, 'combined.csv')
 logger.debug(f"INPUT_DIR: {input_dir}")
 logger.debug(f"OUTPUT_FILE: {output_file}")
 logger.info(f"Bieżący katalog roboczy: {os.getcwd()}")
@@ -288,7 +291,7 @@ try:
     
     # Użyj już ustawionej ścieżki do pliku wyjściowego (może to być katalog tymczasowy)
     if not use_temp_dir:
-        output_file = os.path.join(output_dir, 'combined.csv')
+        output_file = original_output_file
     
     logger.info(f"Zapisywanie połączonych danych do pliku: {output_file}")
     logger.debug(f"Pełna ścieżka do pliku: {os.path.abspath(output_file)}")
@@ -341,6 +344,7 @@ print(f'Łączna liczba wierszy: {len(combined_df)}')
 columns = ", ".join(combined_df.columns)
 print(f'Kolumny: {columns}')
 print(f'Wynik zapisano w: {output_file}')
+print(f'Zapisano połączony zbiór danych: {output_file}')
 print('='*50)
 print('')
 """
@@ -446,3 +450,7 @@ logger.success(f"Pobrano {len(downloaded_files)} wiadomości do {len(result['fol
             parameters={},
             code_template=code_template
         )
+
+    def _get_default_imap_processor(self) -> ProcessorConfig:
+        """Backward-compatible alias returning the default fallback processor."""
+        return self._get_csv_processor()

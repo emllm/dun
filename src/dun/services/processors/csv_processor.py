@@ -1,14 +1,14 @@
 """CSV Processor service for handling CSV file operations."""
 import logging
 from pathlib import Path
-from typing import List, Optional, Dict, Any, Union
+from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
+from dun.config.settings import get_settings
 from dun.core.protocols import ServiceProtocol
 from dun.services.filesystem import fs
-from dun.config.settings import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,8 @@ class CSVProcessorConfig(BaseModel):
     encoding: str = "utf-8"
     include_header: bool = True
     
-    @validator('input_dir', 'output_dir', pre=True)
+    @field_validator('input_dir', 'output_dir', mode='before')
+    @classmethod
     def ensure_path(cls, v):
         if isinstance(v, str):
             return Path(v)
@@ -148,12 +149,16 @@ class CSVProcessor(ServiceProtocol):
     
     async def process_csv_request(self, request: str) -> Dict[str, Any]:
         """Process a natural language request for CSV operations."""
-        # This is a simplified version - in a real implementation, you would use an LLM
-        # to interpret the request and determine the appropriate CSV operations
-        
-        # Simple keyword-based processing for demonstration
+        for token in request.split():
+            cleaned = token.strip("\"',;")
+            if cleaned and ("/" in cleaned or "\\" in cleaned):
+                candidate = Path(cleaned)
+                if candidate.is_dir():
+                    self.config.input_dir = candidate
+                    break
+
         request_lower = request.lower()
-        
+
         if "combine" in request_lower or "join" in request_lower:
             output_file = await self.combine_csv_files()
             return {
@@ -165,6 +170,7 @@ class CSVProcessor(ServiceProtocol):
             files = await self.find_csv_files()
             return {
                 "status": "success",
+                "message": f"Successfully listed {len(files)} CSV files",
                 "files": [str(f) for f in files],
                 "count": len(files)
             }
