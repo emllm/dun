@@ -1,0 +1,74 @@
+{
+  "schema": "new-project.intent/v3",
+  "ticket": "ticket-002",
+  "summary": "Add pyyaml runtime dependency",
+  "workstream": "integration",
+  "classification": {
+    "kind": "FEATURE",
+    "priority": "P1",
+    "origin": "requested"
+  },
+  "allowedPaths": [
+    "project/ticket-002/**",
+    "TODO.md",
+    "project/TICKETS.md",
+    "pyproject.toml"
+  ],
+  "forbiddenPaths": [
+    "project/ticket-*/user-*.md"
+  ],
+  "stacks": [],
+  "dependsOn": [],
+  "conflictsWith": [],
+  "integrationTicket": null,
+  "delivery": {
+    "acceptedBaseSha": "533d22c94824e8380a98a990778c4d6aecbbd590",
+    "targetBranch": "main",
+    "outcome": "Declare pyyaml = ^6.0.1 as a runtime dependency in pyproject.toml for YAML task configuration generation and validation.",
+    "complexity": "S",
+    "estimatedMinutes": 15,
+    "budgets": {
+      "maxImplementationFiles": 2,
+      "maxAffectedComponents": 1,
+      "maxPublicInterfaceChanges": 0,
+      "maxRuntimeDependencies": 1
+    },
+    "runtimeDependencies": [
+      "pyyaml"
+    ],
+    "nonGoals": [
+      "No Python source or test changes in this integration ticket"
+    ],
+    "architecture": {
+      "status": "accepted",
+      "decision": "Add pyyaml = ^6.0.1 under [tool.poetry.dependencies] in pyproject.toml inside the integration workstream.",
+      "components": [
+        {
+          "name": "packaging-manifest",
+          "paths": [
+            "pyproject.toml"
+          ]
+        }
+      ],
+      "responsibilityChanges": false,
+      "interfaceChanges": [],
+      "dataChanges": [],
+      "ui": {
+        "impact": "none",
+        "states": [],
+        "evidence": []
+      },
+      "rollback": "git revert"
+    },
+    "validation": [
+      {
+        "criterion": "AC-01",
+        "commands": [
+          "./project/governance-check.sh --base origin/main --head HEAD",
+          "wellman check --root ."
+        ],
+        "evidence": "Scoped governance gate reports GOV-PASS and wellman check passes with pyyaml declared in pyproject.toml."
+      }
+    ]
+  }
+}

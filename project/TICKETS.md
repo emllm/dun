@@ -4,4 +4,12 @@ Ticket index maintained by `./project/new-ticket.sh`.
 
 | Ticket | Title | Workstream | Status |
 | --- | --- | --- | --- |
-| ticket-001 | Adopt native new-project governance | governance | IN_PROGRESS |
+| ticket-001 | Adopt native new-project governance | governance | DONE |
+| ticket-002 | Add pyyaml runtime dependency | integration | IN_PROGRESS |
+
+<!-- AUTO:TICKET_INDEX:START -->
+| Ticket ID | Spec | Preprompt | Human input | Agent plans | Agent logs | Changelog |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **ticket-001** | [`README.md`](./ticket-001/README.md) | - | - | - | - | - |
+| **ticket-002** | [`README.md`](./ticket-002/README.md) | - | - | - | - | - |
+<!-- AUTO:TICKET_INDEX:END -->
